@@ -270,10 +270,10 @@ export default function Home() {
   const maxScore = sorted.length ? getScore(sorted[0], mode) : 1;
 
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", maxWidth: 860, margin: "0 auto", padding: 20, background: "#0f172a", minHeight: "100vh", color: "#e2e8f0" }}>
+    <div className="main-container" style={{ fontFamily: "system-ui, sans-serif", maxWidth: 860, margin: "0 auto", padding: 20, background: "#0f172a", minHeight: "100vh", color: "#e2e8f0" }}>
       
       <div style={{ textAlign: "center", marginBottom: 28 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 700, color: "#fff", margin: 0 }}>🎯 Приоритизатор фич</h1>
+        <h1 className="main-title" style={{ fontSize: 26, fontWeight: 700, color: "#fff", margin: 0 }}>🎯 Приоритизатор фич</h1>
         <p style={{ color: "#94a3b8", marginTop: 6, fontSize: 13 }}>Оцени фичи — получи приоритет для команды</p>
         <div style={{ display: "inline-flex", background: "#1e293b", borderRadius: 10, padding: 3, marginTop: 12 }}>
           {["RICE", "ICE"].map(m => (
@@ -385,6 +385,8 @@ export default function Home() {
         .feature-name:hover { color: #818cf8 !important; }
         .feature-name:hover .pencil-icon { color: #818cf8 !important; }
         @media (max-width: 639px) {
+          .main-container { max-width: 100% !important; padding: 16px !important; box-sizing: border-box; overflow-x: hidden; }
+          .main-title { font-size: 22px !important; }
           .form-fields-grid { grid-template-columns: 1fr !important; }
           .feature-metrics { display: grid !important; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
         }

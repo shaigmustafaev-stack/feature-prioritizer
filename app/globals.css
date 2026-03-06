@@ -5,9 +5,14 @@
   --foreground: #e2e8f0;
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 body {
   background: #0f172a;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   margin: 0;
+  overflow-x: hidden;
 }
