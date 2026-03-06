@@ -171,7 +171,7 @@ const FeatureCard = ({ feature, index, score, maxScore, isEditing, isIce, editFo
         <button onClick={onRemove} style={{ background: "none", border: "none", color: "#475569", cursor: "pointer", fontSize: 16, padding: "0 4px" }}>✕</button>
       </div>
       {feature.desc && <p style={{ margin: "0 0 6px", fontSize: 12, color: "#64748b", fontStyle: "italic" }}>{feature.desc}</p>}
-      <div style={{ display: "flex", gap: 14, fontSize: 11, color: "#64748b", marginBottom: 6 }}>
+      <div className="feature-metrics" style={{ display: "flex", gap: 14, fontSize: 11, color: "#64748b", marginBottom: 6 }}>
         <span style={{ opacity: isIce ? 0.35 : 1 }}>📊 Охват: {feature.reach}</span>
         <span>💥 Влияние: {feature.impact}</span>
         <span>🎯 Уверенность: {feature.confidence}%</span>
@@ -305,7 +305,7 @@ export default function Home() {
             onChange={e => setForm({ ...form, desc: e.target.value })} style={st.input} />
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div className="form-fields-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <div>
             <label style={{ ...st.label, opacity: isIce ? 0.35 : 1 }}>📊 Охват (пользователей/мес) {!isIce && "*"}</label>
             <NumberInput value={form.reach} placeholder="1000" step={100} min={0}
@@ -384,6 +384,10 @@ export default function Home() {
         .csv-btn:hover { border-color: #6366f1 !important; color: #fff !important; }
         .feature-name:hover { color: #818cf8 !important; }
         .feature-name:hover .pencil-icon { color: #818cf8 !important; }
+        @media (max-width: 639px) {
+          .form-fields-grid { grid-template-columns: 1fr !important; }
+          .feature-metrics { display: grid !important; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+        }
       `}</style>
     </div>
   );
