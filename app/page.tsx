@@ -9,14 +9,8 @@ import { STATUSES } from "./lib/types";
 import type { Status, ScoringMode, FormState, FormErrors, Feature } from "./lib/types";
 import { IMPACT_SCALE, CONF_OPTIONS, STATUS_CYCLE, EMPTY_FORM, DEFAULT_REACH } from "./lib/constants";
 import { getScore, getBarColor, validateFeature, buildCsv } from "./lib/utils";
+import s from "./page.module.css";
 
-// ─── Стили ─────────────────────────────────────────────────────────────────
-const inputStyle = { width: "100%", padding: "9px 12px", borderRadius: 8, border: "1px solid #334155", background: "#0f172a", color: "#fff", fontSize: 14, boxSizing: "border-box" as const };
-const selectStyle = { ...inputStyle, padding: "9px 32px 9px 12px", appearance: "none" as const, backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" };
-const labelStyle = { fontSize: 12, color: "#64748b", display: "block" as const, marginBottom: 4 };
-const errorStyle = { fontSize: 11, color: "#ef4444", marginTop: 3 };
-
-// ─── Компонент ──────────────────────────────────────────────────────────────
 export default function Home() {
   const { features, loaded, addFeature, removeFeature, updateFeature, updateStatus, clearAll } = useFeatures();
 
@@ -104,141 +98,146 @@ export default function Home() {
   const previewColor = previewScore !== null ? getBarColor(previewScore, Math.max(maxScore, previewScore)) : "#64748b";
 
   return (
-    <div className="main-container" style={{ fontFamily: "system-ui, sans-serif", maxWidth: 860, margin: "0 auto", padding: 20, background: "#0f172a", minHeight: "100vh", color: "#e2e8f0" }}>
+    <div className={s.container}>
 
-      {/* ─── Шапка ─── */}
-      <div style={{ textAlign: "center", marginBottom: 28 }}>
-        <h1 className="main-title" style={{ fontSize: 26, fontWeight: 700, color: "#fff", margin: 0 }}>🎯 Приоритизатор фич</h1>
-        <p style={{ color: "#94a3b8", marginTop: 6, fontSize: 13 }}>Оцени фичи — получи приоритет для команды</p>
-        <div style={{ display: "inline-flex", background: "#1e293b", borderRadius: 10, padding: 3, marginTop: 12 }}>
+      {/* Header */}
+      <div className={s.header}>
+        <h1 className={s.title}>🎯 Приоритизатор фич</h1>
+        <p className={s.subtitle}>Оцени фичи — получи приоритет для команды</p>
+        <div className={s.modeToggle}>
           {(["RICE", "ICE"] as ScoringMode[]).map(m => (
-            <button key={m} onClick={() => setMode(m)} style={{ padding: "6px 20px", borderRadius: 8, border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer", background: mode === m ? "#6366f1" : "transparent", color: mode === m ? "#fff" : "#64748b" }}>
+            <button key={m} onClick={() => setMode(m)} className={mode === m ? s.modeBtnActive : s.modeBtn}>
               {m}
             </button>
           ))}
         </div>
-        <p style={{ fontSize: 11, color: "#475569", marginTop: 6 }}>
+        <p className={s.formula}>
           {isIce ? "ICE = Влияние × Уверенность% × (10 ÷ Трудозатраты)" : "RICE = (Охват × Влияние × Уверенность%) ÷ Трудозатраты"}
         </p>
       </div>
 
-      {/* ─── Форма ─── */}
-      <div style={{ background: "#1e293b", borderRadius: 12, padding: 20, marginBottom: 24 }}>
-        <h3 style={{ margin: "0 0 14px", fontSize: 15, color: "#94a3b8" }}>➕ Новая фича</h3>
+      {/* Form */}
+      <div className={s.formCard}>
+        <h3 className={s.formTitle}>➕ Новая фича</h3>
 
-        <div style={{ marginBottom: 10 }}>
-          <label style={labelStyle}>Название *</label>
+        <div className={s.fieldGroup}>
+          <label className={s.label}>Название *</label>
           <input placeholder="Например: Онбординг новых пользователей" value={form.name}
             onChange={e => { setForm({ ...form, name: e.target.value }); setErrors({ ...errors, name: undefined }); }}
-            style={{ ...inputStyle, borderColor: errors.name ? "#ef4444" : "#334155" }} />
-          {errors.name && <div style={errorStyle}>{errors.name}</div>}
+            className={errors.name ? s.inputError : s.input} />
+          {errors.name && <div className={s.error}>{errors.name}</div>}
         </div>
 
-        <div style={{ marginBottom: 12 }}>
-          <label style={labelStyle}>Какую проблему решает? (необязательно)</label>
+        <div className={s.fieldGroupDesc}>
+          <label className={s.label}>Какую проблему решает? (необязательно)</label>
           <input placeholder="Например: пользователи уходят на втором шаге" value={form.desc}
-            onChange={e => setForm({ ...form, desc: e.target.value })} style={inputStyle} />
+            onChange={e => setForm({ ...form, desc: e.target.value })} className={s.input} />
         </div>
 
-        <div className="form-fields-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div className={s.fieldsGrid}>
           <div>
-            <label style={{ ...labelStyle, opacity: isIce ? 0.35 : 1 }}>
+            <label className={isIce ? s.labelDimmed : s.label}>
               📊 Охват (пользователей/мес) {!isIce && "*"}
               <Tooltip text="Сколько пользователей столкнётся с этой фичей в месяц. Чем больше охват — тем выше скор." />
             </label>
             <NumberInput value={form.reach} placeholder="1000" step={100} min={0} disabled={isIce} error={errors.reach}
               onChange={v => { setForm({ ...form, reach: v }); setErrors({ ...errors, reach: undefined }); }} />
-            {errors.reach && <div style={errorStyle}>{errors.reach}</div>}
+            {errors.reach && <div className={s.error}>{errors.reach}</div>}
           </div>
           <div>
-            <label style={labelStyle}>
+            <label className={s.label}>
               💥 Влияние
               <Tooltip text="Насколько сильно фича изменит поведение или опыт пользователя. 3 — трансформирует продукт, 0.25 — едва заметно." />
             </label>
-            <select value={form.impact} onChange={e => setForm({ ...form, impact: e.target.value })} style={selectStyle}>
+            <select value={form.impact} onChange={e => setForm({ ...form, impact: e.target.value })} className={s.select}>
               {IMPACT_SCALE.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}
             </select>
           </div>
           <div>
-            <label style={labelStyle}>
+            <label className={s.label}>
               🎯 Уверенность
               <Tooltip text="Насколько ты уверен в оценках охвата и влияния. 100% — есть данные, 10% — чистая интуиция." />
             </label>
-            <select value={form.confidence} onChange={e => setForm({ ...form, confidence: e.target.value })} style={selectStyle}>
+            <select value={form.confidence} onChange={e => setForm({ ...form, confidence: e.target.value })} className={s.select}>
               {CONF_OPTIONS.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}
             </select>
           </div>
           <div>
-            <label style={labelStyle}>
+            <label className={s.label}>
               ⚡ Трудозатраты (чел-мес) *
               <Tooltip text="Сколько человеко-месяцев займёт реализация. 0.5 — пара недель одного разработчика, 3 — квартал команды." />
             </label>
             <NumberInput value={form.effort} placeholder="2" step={0.5} min={0.25} error={errors.effort}
               onChange={v => { setForm({ ...form, effort: v }); setErrors({ ...errors, effort: undefined }); }} />
-            {errors.effort && <div style={errorStyle}>{errors.effort}</div>}
+            {errors.effort && <div className={s.error}>{errors.effort}</div>}
           </div>
         </div>
 
         {previewScore !== null && (
-          <div className="preview-block" style={{ marginTop: 12, padding: "12px 16px", borderRadius: 10, background: "#0f172a", border: `1px solid ${previewColor}40`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div className={s.preview} style={{ borderColor: `${previewColor}40` }}>
             <div>
-              <div style={{ fontSize: 11, color: "#64748b", marginBottom: 2 }}>Прогноз {mode}-скора</div>
-              <div style={{ fontSize: 12, color: "#475569" }}>
+              <div className={s.previewLabel}>Прогноз {mode}-скора</div>
+              <div className={s.previewRank}>
                 {previewRank === 1 && sorted.length > 0 ? "🥇 Войдёт на 1-е место"
                   : previewRank !== null && sorted.length > 0 ? `📍 Место в бэклоге: #${previewRank} из ${sorted.length + 1}`
                   : "📍 Первая фича в бэклоге"}
               </div>
             </div>
-            <span style={{ fontSize: 26, fontWeight: 800, color: previewColor, lineHeight: 1 }}>{previewScore}</span>
+            <span className={s.previewScore} style={{ color: previewColor }}>{previewScore}</span>
           </div>
         )}
 
-        <button onClick={handleAddFeature} className="add-btn" style={{ marginTop: 14, width: "100%", padding: "10px", borderRadius: 8, border: "none", background: justAdded ? "#22c55e" : "#6366f1", color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer", transition: "all 0.2s" }}>
+        <button onClick={handleAddFeature} className={justAdded ? s.addBtnSuccess : s.addBtn}>
           {justAdded ? "✓ Добавлено!" : "Добавить в бэклог"}
         </button>
       </div>
 
-      {/* ─── Бэклог ─── */}
+      {/* Backlog */}
       <div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-          <h3 style={{ margin: 0, fontSize: 15, color: "#94a3b8" }}>📋 Бэклог ({sorted.length})</h3>
-          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        <div className={s.backlogHeader}>
+          <h3 className={s.backlogTitle}>📋 Бэклог ({sorted.length})</h3>
+          <div className={s.backlogActions}>
             {sorted.length > 0 && (
-              <button onClick={handleExportCsv} className="csv-btn" style={{ padding: "5px 12px", borderRadius: 7, border: "1px solid #334155", background: "transparent", color: "#94a3b8", fontSize: 12, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, transition: "all 0.2s" }}>
-                📥 Скачать CSV
-              </button>
+              <button onClick={handleExportCsv} className={s.csvBtn}>📥 Скачать CSV</button>
             )}
             {sorted.length > 0 && (
-              <button onClick={handleClear} className="clear-btn" style={{ padding: "5px 12px", borderRadius: 7, fontSize: 12, cursor: "pointer", border: `1px solid ${confirmClear ? "#ef4444" : "#334155"}`, background: confirmClear ? "#ef444415" : "transparent", color: confirmClear ? "#ef4444" : "#475569", transition: "all 0.2s" }}>
+              <button onClick={handleClear} className={confirmClear ? s.clearBtnConfirm : s.clearBtn}>
                 {confirmClear ? "Точно удалить?" : "🗑 Очистить"}
               </button>
             )}
-            <span style={{ fontSize: 12, color: "#475569" }}>по {mode}-скору ↓</span>
+            <span className={s.sortLabel}>по {mode}-скору ↓</span>
           </div>
         </div>
 
-        {/* Фильтр по статусам */}
+        {/* Status filter */}
         {sorted.length > 0 && (
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
-            {(["all", ...STATUS_CYCLE] as const).map(s => {
-              const count = s === "all" ? features.length : features.filter(f => f.status === s).length;
-              const active = filterStatus === s;
-              const sc = s === "all" ? null : STATUSES[s];
+          <div className={s.filterRow}>
+            {(["all", ...STATUS_CYCLE] as const).map(st => {
+              const count = st === "all" ? features.length : features.filter(f => f.status === st).length;
+              const active = filterStatus === st;
+              const sc = st === "all" ? null : STATUSES[st];
               return (
-                <button key={s} onClick={() => setFilterStatus(s)} style={{ padding: "4px 12px", borderRadius: 20, fontSize: 12, cursor: "pointer", border: "1px solid", borderColor: active ? (sc?.color ?? "#6366f1") : "#334155", background: active ? (sc ? sc.bg : "#6366f118") : "transparent", color: active ? (sc?.color ?? "#a5b4fc") : "#475569", fontWeight: active ? 600 : 400, transition: "all 0.15s" }}>
-                  {s === "all" ? "Все" : STATUSES[s].label}{count > 0 && <span style={{ opacity: 0.7 }}> ({count})</span>}
+                <button key={st} onClick={() => setFilterStatus(st)} className={s.filterPill}
+                  style={{
+                    borderColor: active ? (sc?.color ?? "#6366f1") : undefined,
+                    background: active ? (sc ? sc.bg : "#6366f118") : undefined,
+                    color: active ? (sc?.color ?? "#a5b4fc") : undefined,
+                    fontWeight: active ? 600 : undefined,
+                  }}>
+                  {st === "all" ? "Все" : STATUSES[st].label}
+                  {count > 0 && <span className={s.filterPillCount}> ({count})</span>}
                 </button>
               );
             })}
           </div>
         )}
 
-        {!loaded && <p style={{ color: "#475569", textAlign: "center", padding: 40 }}>Загрузка...</p>}
+        {!loaded && <p className={s.loading}>Загрузка...</p>}
         {loaded && sorted.length === 0 && (
-          <div style={{ textAlign: "center", padding: "40px 20px", color: "#475569" }}>
-            <div style={{ fontSize: 32, marginBottom: 8 }}>📝</div>
-            <p style={{ margin: 0, fontSize: 15 }}>Бэклог пуст</p>
-            <p style={{ margin: "6px 0 0", fontSize: 13 }}>Добавь первую фичу — заполни форму выше</p>
+          <div className={s.emptyState}>
+            <div className={s.emptyIcon}>📝</div>
+            <p className={s.emptyTitle}>Бэклог пуст</p>
+            <p className={s.emptyHint}>Добавь первую фичу — заполни форму выше</p>
           </div>
         )}
 
@@ -250,29 +249,9 @@ export default function Home() {
             editForm={editForm} setEditForm={setEditForm}
             onStartEdit={() => startEdit(f)} onSaveEdit={saveEdit}
             onCancelEdit={() => setEditId(null)} onRemove={() => removeFeature(f.id)}
-            onStatusChange={s => updateStatus(f.id, s)} />
+            onStatusChange={st => updateStatus(f.id, st)} />
         ))}
       </div>
-
-      <style>{`
-        input[type=number]::-webkit-inner-spin-button,
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; cursor: text; }
-        input:focus::placeholder { color: transparent; }
-        .add-btn:hover { filter: brightness(1.15); }
-        @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-        .preview-block { animation: fadeSlideIn 0.2s ease; }
-        .csv-btn:hover { border-color: #6366f1 !important; color: #fff !important; }
-        .feature-name:hover { color: #818cf8 !important; }
-        .feature-name:hover .pencil-icon { color: #818cf8 !important; }
-        .status-badge:hover { filter: brightness(1.2); }
-        @media (max-width: 639px) {
-          .main-container { max-width: 100% !important; padding: 16px !important; box-sizing: border-box; overflow-x: hidden; }
-          .main-title { font-size: 22px !important; }
-          .form-fields-grid { grid-template-columns: 1fr !important; }
-          .feature-metrics { display: grid !important; grid-template-columns: 1fr 1fr; gap: 4px 10px; }
-        }
-      `}</style>
     </div>
   );
 }

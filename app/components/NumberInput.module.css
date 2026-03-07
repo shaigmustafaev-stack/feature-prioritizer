@@ -1,0 +1,47 @@
+.wrapper {
+  display: flex;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.wrapperDisabled {
+  composes: wrapper;
+  opacity: 0.35;
+}
+
+.btn {
+  width: 36px;
+  border: none;
+  background: #334155;
+  color: #94a3b8;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnDisabled {
+  composes: btn;
+  background: #0f172a;
+  cursor: default;
+}
+
+.input {
+  flex: 1;
+  padding: 9px 8px;
+  border: none;
+  background: #0f172a;
+  color: #fff;
+  font-size: 14px;
+  text-align: center;
+  outline: none;
+  cursor: text;
+}
+
+.inputDisabled {
+  composes: input;
+  background: #0a0f1a;
+  color: #334155;
+  cursor: default;
+}

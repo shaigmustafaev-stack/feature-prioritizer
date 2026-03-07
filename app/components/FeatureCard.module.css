@@ -1,0 +1,234 @@
+/* ─── Card shell ─── */
+.card {
+  background: #1e293b;
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 10px;
+  border: 1px solid transparent;
+  transition: opacity 0.2s;
+}
+
+.cardDimmed {
+  composes: card;
+  opacity: 0.6;
+}
+
+.cardEditing {
+  composes: card;
+  border-color: #6366f1;
+}
+
+/* ─── View mode ─── */
+.topRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rank {
+  color: #000;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 2px 7px;
+  border-radius: 5px;
+}
+
+.statusBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.statusBadge:hover {
+  filter: brightness(1.2);
+}
+
+.featureName {
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #e2e8f0;
+  transition: color 0.15s;
+}
+
+.featureName:hover {
+  color: #818cf8 !important;
+}
+
+.pencilIcon {
+  color: #475569;
+  transition: color 0.15s;
+  display: flex;
+}
+
+.featureName:hover .pencilIcon {
+  color: #818cf8 !important;
+}
+
+.removeBtn {
+  background: none;
+  border: none;
+  color: #475569;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0 4px;
+}
+
+.desc {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: #64748b;
+  font-style: italic;
+}
+
+.metrics {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.metricDimmed {
+  opacity: 0.35;
+}
+
+/* ─── Score bar ─── */
+.barRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.barTrack {
+  flex: 1;
+  height: 7px;
+  background: #0f172a;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.scoreValue {
+  font-weight: 700;
+  font-size: 15px;
+  min-width: 55px;
+  text-align: right;
+}
+
+/* ─── Edit mode ─── */
+.editInput {
+  width: 100%;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #6366f1;
+  background: #0f172a;
+  color: #fff;
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.editInputName {
+  composes: editInput;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.editInputDesc {
+  composes: editInput;
+  font-size: 12px;
+  margin-bottom: 10px;
+  border-color: #334155;
+}
+
+.editInputDisabled {
+  composes: editInput;
+  border-color: #1e293b;
+  background: #0a0f1a;
+  color: #334155;
+}
+
+.editSelect {
+  composes: editInput;
+  padding: 6px 28px 6px 10px;
+  font-size: 13px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+.editGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.editLabel {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.editLabelDimmed {
+  composes: editLabel;
+  color: #334155;
+}
+
+.editActions {
+  display: flex;
+  gap: 8px;
+}
+
+.saveBtn {
+  flex: 1;
+  padding: 7px;
+  border-radius: 7px;
+  border: none;
+  background: #6366f1;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancelBtn {
+  padding: 7px 14px;
+  border-radius: 7px;
+  border: 1px solid #334155;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 639px) {
+  .metrics {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 10px;
+  }
+}

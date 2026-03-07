@@ -1,3 +1,5 @@
+import s from "./NumberInput.module.css";
+
 interface Props {
   value: string;
   onChange: (v: string) => void;
@@ -13,19 +15,21 @@ export function NumberInput({ value, onChange, placeholder, step = 1, min = 0, d
   const increment = () => onChange(String((Number(value) || 0) + step));
 
   const borderColor = error ? "#ef4444" : disabled ? "#1e293b" : "#334155";
-  const btnBg = disabled ? "#0f172a" : "#334155";
 
   return (
-    <div style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: `1px solid ${borderColor}`, opacity: disabled ? 0.35 : 1 }}>
-      <button disabled={disabled} onClick={decrement}
-        style={{ width: 36, border: "none", background: btnBg, color: "#94a3b8", fontSize: 18, cursor: disabled ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className={disabled ? s.wrapperDisabled : s.wrapper} style={{ border: `1px solid ${borderColor}` }}>
+      <button disabled={disabled} onClick={decrement} className={disabled ? s.btnDisabled : s.btn}>
         −
       </button>
-      <input type="number" disabled={disabled} placeholder={placeholder} value={value}
+      <input
+        type="number"
+        disabled={disabled}
+        placeholder={placeholder}
+        value={value}
         onChange={e => onChange(e.target.value)}
-        style={{ flex: 1, padding: "9px 8px", border: "none", background: disabled ? "#0a0f1a" : "#0f172a", color: disabled ? "#334155" : "#fff", fontSize: 14, textAlign: "center", outline: "none", cursor: disabled ? "default" : "text" }} />
-      <button disabled={disabled} onClick={increment}
-        style={{ width: 36, border: "none", background: btnBg, color: "#94a3b8", fontSize: 18, cursor: disabled ? "default" : "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        className={disabled ? s.inputDisabled : s.input}
+      />
+      <button disabled={disabled} onClick={increment} className={disabled ? s.btnDisabled : s.btn}>
         +
       </button>
     </div>
