@@ -269,6 +269,17 @@ export default function Home() {
   const sorted = [...features].sort((a, b) => getScore(b, mode) - getScore(a, mode));
   const maxScore = sorted.length ? getScore(sorted[0], mode) : 1;
 
+  const previewFeature: Feature = {
+    id: 0, name: form.name, desc: form.desc,
+    reach: Number(form.reach) || DEFAULT_REACH,
+    impact: Number(form.impact),
+    confidence: Number(form.confidence),
+    effort: Number(form.effort) || 0,
+  };
+  const previewScore = form.effort && Number(form.effort) > 0 ? getScore(previewFeature, mode) : null;
+  const previewRank = previewScore !== null ? sorted.filter(f => getScore(f, mode) > previewScore).length + 1 : null;
+  const previewColor = previewScore !== null ? getBarColor(previewScore, Math.max(maxScore, previewScore)) : "#64748b";
+
   return (
     <div className="main-container" style={{ fontFamily: "system-ui, sans-serif", maxWidth: 860, margin: "0 auto", padding: 20, background: "#0f172a", minHeight: "100vh", color: "#e2e8f0" }}>
       
@@ -334,6 +345,24 @@ export default function Home() {
           </div>
         </div>
 
+        {previewScore !== null && (
+          <div className="preview-block" style={{
+            marginTop: 12, padding: "12px 16px", borderRadius: 10,
+            background: "#0f172a", border: `1px solid ${previewColor}40`,
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+          }}>
+            <div>
+              <div style={{ fontSize: 11, color: "#64748b", marginBottom: 2 }}>Прогноз {mode}-скора</div>
+              <div style={{ fontSize: 12, color: "#475569" }}>
+                {previewRank === 1 && sorted.length > 0 ? "🥇 Войдёт на 1-е место" :
+                 previewRank !== null && sorted.length > 0 ? `📍 Место в бэклоге: #${previewRank} из ${sorted.length + 1}` :
+                 "📍 Первая фича в бэклоге"}
+              </div>
+            </div>
+            <span style={{ fontSize: 26, fontWeight: 800, color: previewColor, lineHeight: 1 }}>{previewScore}</span>
+          </div>
+        )}
+
         <button onClick={addFeature} className="add-btn" style={{
           marginTop: 14, width: "100%", padding: "10px", borderRadius: 8, border: "none",
           background: justAdded ? "#22c55e" : "#6366f1", color: "#fff", fontSize: 14, fontWeight: 600,
@@ -381,6 +410,8 @@ export default function Home() {
         input[type=number] { -moz-appearance: textfield; cursor: text; }
         input:focus::placeholder { color: transparent; }
         .add-btn:hover { filter: brightness(1.15); }
+        @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+        .preview-block { animation: fadeSlideIn 0.2s ease; }
         .csv-btn:hover { border-color: #6366f1 !important; color: #fff !important; }
         .feature-name:hover { color: #818cf8 !important; }
         .feature-name:hover .pencil-icon { color: #818cf8 !important; }
