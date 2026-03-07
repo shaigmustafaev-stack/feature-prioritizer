@@ -102,6 +102,22 @@ const NumberInput = ({ value, onChange, placeholder, step = 1, min = 0, disabled
   </div>
 );
 
+const Tooltip = ({ text }: { text: string }) => {
+  const [show, setShow] = useState(false);
+  return (
+    <span style={{ position: "relative", display: "inline-flex", verticalAlign: "middle", marginLeft: 4 }}
+      onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+      <span style={{ width: 14, height: 14, borderRadius: "50%", background: "#1e293b", border: "1px solid #475569", color: "#64748b", fontSize: 9, display: "inline-flex", alignItems: "center", justifyContent: "center", cursor: "help", fontStyle: "normal", fontWeight: 700 }}>?</span>
+      {show && (
+        <div style={{ position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)", background: "#1e293b", border: "1px solid #334155", borderRadius: 8, padding: "8px 10px", fontSize: 11, color: "#94a3b8", zIndex: 100, lineHeight: 1.6, width: 200, pointerEvents: "none", boxShadow: "0 4px 16px #00000060" }}>
+          {text}
+          <div style={{ position: "absolute", top: "100%", left: "50%", transform: "translateX(-50%)", width: 0, height: 0, borderLeft: "5px solid transparent", borderRight: "5px solid transparent", borderTop: "5px solid #334155" }} />
+        </div>
+      )}
+    </span>
+  );
+};
+
 const PencilIcon = () => (
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M17 3a2.85 2.85 0 0 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/>
@@ -199,6 +215,7 @@ export default function Home() {
   const [editId, setEditId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<Record<string, string>>({});
   const [justAdded, setJustAdded] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
 
   const isIce = mode === "ICE";
 
@@ -318,26 +335,26 @@ export default function Home() {
 
         <div className="form-fields-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <div>
-            <label style={{ ...st.label, opacity: isIce ? 0.35 : 1 }}>📊 Охват (пользователей/мес) {!isIce && "*"}</label>
+            <label style={{ ...st.label, opacity: isIce ? 0.35 : 1 }}>📊 Охват (пользователей/мес) {!isIce && "*"}<Tooltip text="Сколько пользователей столкнётся с этой фичей в месяц. Чем больше охват — тем выше скор." /></label>
             <NumberInput value={form.reach} placeholder="1000" step={100} min={0}
               disabled={isIce} error={errors.reach ?? undefined}
               onChange={v => { setForm({ ...form, reach: v }); setErrors({ ...errors, reach: null }); }} />
             {errors.reach && <div style={st.err}>{errors.reach}</div>}
           </div>
           <div>
-            <label style={st.label}>💥 Влияние</label>
+            <label style={st.label}>💥 Влияние<Tooltip text="Насколько сильно фича изменит поведение или опыт пользователя. 3 — трансформирует продукт, 0.25 — едва заметно." /></label>
             <select value={form.impact} onChange={e => setForm({ ...form, impact: e.target.value })} style={st.select}>
               {IMPACT_SCALE.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}
             </select>
           </div>
           <div>
-            <label style={st.label}>🎯 Уверенность</label>
+            <label style={st.label}>🎯 Уверенность<Tooltip text="Насколько ты уверен в оценках охвата и влияния. 100% — есть данные, 10% — чистая интуиция." /></label>
             <select value={form.confidence} onChange={e => setForm({ ...form, confidence: e.target.value })} style={st.select}>
               {CONF_OPTIONS.map(o => <option key={o.val} value={o.val}>{o.label}</option>)}
             </select>
           </div>
           <div>
-            <label style={st.label}>⚡ Трудозатраты (чел-мес) *</label>
+            <label style={st.label}>⚡ Трудозатраты (чел-мес) *<Tooltip text="Сколько человеко-месяцев займёт реализация. 0.5 — пара недель одного разработчика, 3 — квартал команды." /></label>
             <NumberInput value={form.effort} placeholder="2" step={0.5} min={0.25}
               error={errors.effort ?? undefined}
               onChange={v => { setForm({ ...form, effort: v }); setErrors({ ...errors, effort: null }); }} />
@@ -380,6 +397,18 @@ export default function Home() {
                 background: "transparent", color: "#94a3b8", fontSize: 12, cursor: "pointer",
                 display: "flex", alignItems: "center", gap: 4, transition: "all 0.2s"
               }}>📥 Скачать CSV</button>
+            )}
+            {sorted.length > 0 && (
+              <button onClick={() => {
+                if (confirmClear) { setFeatures([]); setConfirmClear(false); }
+                else { setConfirmClear(true); setTimeout(() => setConfirmClear(false), 3000); }
+              }} className="clear-btn" style={{
+                padding: "5px 12px", borderRadius: 7, fontSize: 12, cursor: "pointer",
+                border: `1px solid ${confirmClear ? "#ef4444" : "#334155"}`,
+                background: confirmClear ? "#ef444415" : "transparent",
+                color: confirmClear ? "#ef4444" : "#475569",
+                transition: "all 0.2s"
+              }}>{confirmClear ? "Точно удалить?" : "🗑 Очистить"}</button>
             )}
             <span style={{ fontSize: 12, color: "#475569" }}>по {mode}-скору ↓</span>
           </div>
