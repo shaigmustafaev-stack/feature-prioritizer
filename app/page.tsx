@@ -24,6 +24,15 @@ const CONF_OPTIONS = [
   { val: 10, label: "10% — Интуиция" },
 ];
 
+const STATUSES = {
+  new:         { label: "Новая",     color: "#64748b", bg: "#64748b18" },
+  "in-progress": { label: "В работе", color: "#6366f1", bg: "#6366f118" },
+  done:        { label: "Готово",    color: "#22c55e", bg: "#22c55e18" },
+  deferred:    { label: "Отложена",  color: "#eab308", bg: "#eab30818" },
+} as const;
+type Status = keyof typeof STATUSES;
+const STATUS_CYCLE: Status[] = ["new", "in-progress", "done", "deferred"];
+
 interface Feature {
   id: number;
   name: string;
@@ -32,12 +41,13 @@ interface Feature {
   impact: number;
   confidence: number;
   effort: number;
+  status: Status;
 }
 
 const DEMO_FEATURES: Feature[] = [
-  { id: 1, name: "Онбординг новых пользователей", desc: "Пошаговый гайд для новичков", reach: 1000, impact: 3, confidence: 80, effort: 2 },
-  { id: 2, name: "Тёмная тема", desc: "Переключение светлая/тёмная", reach: 500, impact: 0.5, confidence: 90, effort: 0.5 },
-  { id: 3, name: "Интеграция с Slack", desc: "Уведомления и команды в Slack", reach: 300, impact: 2, confidence: 50, effort: 5 },
+  { id: 1, name: "Онбординг новых пользователей", desc: "Пошаговый гайд для новичков", reach: 1000, impact: 3, confidence: 80, effort: 2, status: "in-progress" },
+  { id: 2, name: "Тёмная тема", desc: "Переключение светлая/тёмная", reach: 500, impact: 0.5, confidence: 90, effort: 0.5, status: "new" },
+  { id: 3, name: "Интеграция с Slack", desc: "Уведомления и команды в Slack", reach: 300, impact: 2, confidence: 50, effort: 5, status: "deferred" },
 ];
 
 const EMPTY_FORM = { name: "", desc: "", reach: "", impact: "1", confidence: "80", effort: "" };
@@ -124,11 +134,12 @@ const PencilIcon = () => (
   </svg>
 );
 
-const FeatureCard = ({ feature, index, score, maxScore, isEditing, isIce, editForm, setEditForm, onStartEdit, onSaveEdit, onCancelEdit, onRemove }: {
+const FeatureCard = ({ feature, index, score, maxScore, isEditing, isIce, editForm, setEditForm, onStartEdit, onSaveEdit, onCancelEdit, onRemove, onStatusChange }: {
   feature: Feature; index: number; score: number; maxScore: number;
   isEditing: boolean; isIce: boolean; editForm: Record<string, string>;
   setEditForm: (f: Record<string, string>) => void;
   onStartEdit: () => void; onSaveEdit: () => void; onCancelEdit: () => void; onRemove: () => void;
+  onStatusChange: (s: Status) => void;
 }) => {
   const barW = maxScore > 0 ? (score / maxScore) * 100 : 0;
   const color = getBarColor(score, maxScore);
@@ -173,11 +184,16 @@ const FeatureCard = ({ feature, index, score, maxScore, isEditing, isIce, editFo
     );
   }
 
+  const statusStyle = STATUSES[feature.status];
   return (
-    <div style={{ background: "#1e293b", borderRadius: 10, padding: 14, marginBottom: 10, border: "1px solid transparent" }}>
+    <div style={{ background: "#1e293b", borderRadius: 10, padding: 14, marginBottom: 10, border: "1px solid transparent", opacity: (feature.status === "done" || feature.status === "deferred") ? 0.6 : 1, transition: "opacity 0.2s" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <span style={{ background: color, color: "#000", fontWeight: 700, fontSize: 12, padding: "2px 7px", borderRadius: 5 }}>#{index + 1}</span>
+          <span onClick={() => { const i = STATUS_CYCLE.indexOf(feature.status); onStatusChange(STATUS_CYCLE[(i + 1) % STATUS_CYCLE.length]); }}
+            className="status-badge" style={{ fontSize: 11, fontWeight: 600, padding: "2px 8px", borderRadius: 20, cursor: "pointer", background: statusStyle.bg, color: statusStyle.color, border: `1px solid ${statusStyle.color}40`, transition: "all 0.15s", userSelect: "none" }}>
+            {statusStyle.label}
+          </span>
           <span onClick={onStartEdit} className="feature-name"
             style={{ fontWeight: 600, fontSize: 14, cursor: "pointer", display: "flex", alignItems: "center", gap: 5, color: "#e2e8f0", transition: "color 0.15s" }}>
             {feature.name}
@@ -216,6 +232,7 @@ export default function Home() {
   const [editForm, setEditForm] = useState<Record<string, string>>({});
   const [justAdded, setJustAdded] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<Status | "all">("all");
 
   const isIce = mode === "ICE";
 
@@ -223,7 +240,7 @@ export default function Home() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) { setFeatures(JSON.parse(saved)); }
+      if (saved) { setFeatures(JSON.parse(saved).map((f: Feature) => ({ ...f, status: f.status || "new" }))); }
       else { setFeatures(DEMO_FEATURES); }
     } catch { setFeatures(DEMO_FEATURES); }
     setLoaded(true);
@@ -242,7 +259,7 @@ export default function Home() {
     setFeatures([...features, {
       id: Date.now(), name: form.name.trim(), desc: form.desc.trim(),
       reach: Number(form.reach) || DEFAULT_REACH, impact: Number(form.impact),
-      confidence: Number(form.confidence), effort: Number(form.effort),
+      confidence: Number(form.confidence), effort: Number(form.effort), status: "new" as Status,
     }]);
     setForm({ ...EMPTY_FORM });
     setErrors({});
@@ -271,6 +288,9 @@ export default function Home() {
     setEditId(null);
   };
 
+  const updateStatus = (id: number, status: Status) =>
+    setFeatures(features.map(f => f.id === id ? { ...f, status } : f));
+
   const exportCsv = () => {
     if (sorted.length === 0) return;
     const csv = buildCsv(sorted);
@@ -285,6 +305,7 @@ export default function Home() {
 
   const sorted = [...features].sort((a, b) => getScore(b, mode) - getScore(a, mode));
   const maxScore = sorted.length ? getScore(sorted[0], mode) : 1;
+  const filtered = filterStatus === "all" ? sorted : sorted.filter(f => f.status === filterStatus);
 
   const previewFeature: Feature = {
     id: 0, name: form.name, desc: form.desc,
@@ -292,6 +313,7 @@ export default function Home() {
     impact: Number(form.impact),
     confidence: Number(form.confidence),
     effort: Number(form.effort) || 0,
+    status: "new" as Status,
   };
   const previewScore = form.effort && Number(form.effort) > 0 ? getScore(previewFeature, mode) : null;
   const previewRank = previewScore !== null ? sorted.filter(f => getScore(f, mode) > previewScore).length + 1 : null;
@@ -414,6 +436,27 @@ export default function Home() {
           </div>
         </div>
 
+        {sorted.length > 0 && (
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 14 }}>
+            {(["all", ...STATUS_CYCLE] as const).map(s => {
+              const count = s === "all" ? features.length : features.filter(f => f.status === s).length;
+              const active = filterStatus === s;
+              const sc = s === "all" ? null : STATUSES[s];
+              return (
+                <button key={s} onClick={() => setFilterStatus(s)} style={{
+                  padding: "4px 12px", borderRadius: 20, fontSize: 12, cursor: "pointer", border: "1px solid",
+                  borderColor: active ? (sc?.color ?? "#6366f1") : "#334155",
+                  background: active ? (sc ? sc.bg : "#6366f118") : "transparent",
+                  color: active ? (sc?.color ?? "#a5b4fc") : "#475569",
+                  fontWeight: active ? 600 : 400, transition: "all 0.15s",
+                }}>
+                  {s === "all" ? "Все" : STATUSES[s].label} {count > 0 && <span style={{ opacity: 0.7 }}>({count})</span>}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {!loaded && <p style={{ color: "#475569", textAlign: "center", padding: 40 }}>Загрузка...</p>}
         {loaded && sorted.length === 0 && (
           <div style={{ textAlign: "center", padding: "40px 20px", color: "#475569" }}>
@@ -423,13 +466,14 @@ export default function Home() {
           </div>
         )}
 
-        {sorted.map((f, i) => (
+        {filtered.map((f, i) => (
           <FeatureCard key={f.id} feature={f} index={i}
             score={getScore(f, mode)} maxScore={maxScore}
             isEditing={editId === f.id} isIce={isIce}
             editForm={editForm} setEditForm={setEditForm}
             onStartEdit={() => startEdit(f)} onSaveEdit={saveEdit}
-            onCancelEdit={() => setEditId(null)} onRemove={() => removeFeature(f.id)} />
+            onCancelEdit={() => setEditId(null)} onRemove={() => removeFeature(f.id)}
+            onStatusChange={s => updateStatus(f.id, s)} />
         ))}
       </div>
 
@@ -444,6 +488,7 @@ export default function Home() {
         .csv-btn:hover { border-color: #6366f1 !important; color: #fff !important; }
         .feature-name:hover { color: #818cf8 !important; }
         .feature-name:hover .pencil-icon { color: #818cf8 !important; }
+        .status-badge:hover { filter: brightness(1.2); }
         @media (max-width: 639px) {
           .main-container { max-width: 100% !important; padding: 16px !important; box-sizing: border-box; overflow-x: hidden; }
           .main-title { font-size: 22px !important; }
