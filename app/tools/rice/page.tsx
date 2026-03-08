@@ -105,15 +105,13 @@ export default function Home() {
         <h1 className={s.title}>🎯 Приоритизатор фич</h1>
         <div className={s.modeToggle}>
           {(["RICE", "ICE"] as ScoringMode[]).map(m => (
-            <span key={m} className={s.modeItem}>
-              <button type="button" onClick={() => setMode(m)} className={mode === m ? s.modeBtnActive : s.modeBtn}>
-                {m}
-              </button>
-              <Tooltip text={m === "RICE"
+            <button key={m} type="button" onClick={() => setMode(m)}
+              className={mode === m ? s.modeBtnActive : s.modeBtn}
+              data-tooltip={m === "RICE"
                 ? "RICE = (Охват × Влияние × Уверенность%) ÷ Трудозатраты"
-                : "ICE = Влияние × Уверенность% × (10 ÷ Трудозатраты)"}
-              />
-            </span>
+                : "ICE = Влияние × Уверенность% × (10 ÷ Трудозатраты)"}>
+              {m}
+            </button>
           ))}
         </div>
       </div>

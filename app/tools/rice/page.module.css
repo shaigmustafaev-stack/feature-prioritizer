@@ -32,12 +32,8 @@
   gap: 2px;
 }
 
-.modeItem {
-  display: inline-flex;
-  align-items: center;
-}
-
 .modeBtn {
+  position: relative;
   padding: 5px 16px;
   border-radius: 8px;
   border: none;
@@ -52,6 +48,30 @@
   composes: modeBtn;
   background: #6366f1;
   color: #fff;
+}
+
+.modeBtn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  font-size: 11px;
+  font-weight: 400;
+  padding: 5px 10px;
+  border-radius: 6px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 20;
+}
+
+.modeBtn:hover::after {
+  opacity: 1;
 }
 
 /* ─── Form ─── */
