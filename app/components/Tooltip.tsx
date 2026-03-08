@@ -12,9 +12,18 @@ export function Tooltip({ text }: Props) {
 
   return (
     <span className={s.wrapper} onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
-      <span className={s.trigger}>?</span>
+      <button
+        type="button"
+        className={s.trigger}
+        aria-label="Показать подсказку"
+        aria-expanded={show}
+        onFocus={() => setShow(true)}
+        onBlur={() => setShow(false)}
+      >
+        ?
+      </button>
       {show && (
-        <div className={s.popup}>
+        <div className={s.popup} role="tooltip">
           {text}
           <div className={s.arrow} />
         </div>

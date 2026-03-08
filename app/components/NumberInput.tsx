@@ -18,7 +18,7 @@ export function NumberInput({ value, onChange, placeholder, step = 1, min = 0, d
 
   return (
     <div className={disabled ? s.wrapperDisabled : s.wrapper} style={{ border: `1px solid ${borderColor}` }}>
-      <button disabled={disabled} onClick={decrement} className={disabled ? s.btnDisabled : s.btn}>
+      <button type="button" disabled={disabled} onClick={decrement} className={disabled ? s.btnDisabled : s.btn} aria-label="Уменьшить значение">
         −
       </button>
       <input
@@ -29,7 +29,7 @@ export function NumberInput({ value, onChange, placeholder, step = 1, min = 0, d
         onChange={e => onChange(e.target.value)}
         className={disabled ? s.inputDisabled : s.input}
       />
-      <button disabled={disabled} onClick={increment} className={disabled ? s.btnDisabled : s.btn}>
+      <button type="button" disabled={disabled} onClick={increment} className={disabled ? s.btnDisabled : s.btn} aria-label="Увеличить значение">
         +
       </button>
     </div>

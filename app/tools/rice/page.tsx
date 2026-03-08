@@ -106,7 +106,7 @@ export default function Home() {
         <p className={s.subtitle}>Оцени фичи — получи приоритет для команды</p>
         <div className={s.modeToggle}>
           {(["RICE", "ICE"] as ScoringMode[]).map(m => (
-            <button key={m} onClick={() => setMode(m)} className={mode === m ? s.modeBtnActive : s.modeBtn}>
+            <button type="button" key={m} onClick={() => setMode(m)} className={mode === m ? s.modeBtnActive : s.modeBtn}>
               {m}
             </button>
           ))}
@@ -187,7 +187,7 @@ export default function Home() {
           </div>
         )}
 
-        <button onClick={handleAddFeature} className={justAdded ? s.addBtnSuccess : s.addBtn}>
+        <button type="button" onClick={handleAddFeature} className={justAdded ? s.addBtnSuccess : s.addBtn}>
           {justAdded ? "✓ Добавлено!" : "Добавить в бэклог"}
         </button>
       </div>
@@ -198,10 +198,10 @@ export default function Home() {
           <h3 className={s.backlogTitle}>📋 Бэклог ({sorted.length})</h3>
           <div className={s.backlogActions}>
             {sorted.length > 0 && (
-              <button onClick={handleExportCsv} className={s.csvBtn}>📥 Скачать CSV</button>
+              <button type="button" onClick={handleExportCsv} className={s.csvBtn}>📥 Скачать CSV</button>
             )}
             {sorted.length > 0 && (
-              <button onClick={handleClear} className={confirmClear ? s.clearBtnConfirm : s.clearBtn}>
+              <button type="button" onClick={handleClear} className={confirmClear ? s.clearBtnConfirm : s.clearBtn}>
                 {confirmClear ? "Точно удалить?" : "🗑 Очистить"}
               </button>
             )}
@@ -217,7 +217,7 @@ export default function Home() {
               const active = filterStatus === st;
               const sc = st === "all" ? null : STATUSES[st];
               return (
-                <button key={st} onClick={() => setFilterStatus(st)} className={s.filterPill}
+                <button type="button" key={st} onClick={() => setFilterStatus(st)} className={s.filterPill}
                   style={{
                     borderColor: active ? (sc?.color ?? "#6366f1") : undefined,
                     background: active ? (sc ? sc.bg : "#6366f118") : undefined,

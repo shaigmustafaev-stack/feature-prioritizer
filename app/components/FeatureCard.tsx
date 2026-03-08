@@ -68,8 +68,8 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
           </div>
         </div>
         <div className={s.editActions}>
-          <button onClick={onSaveEdit} className={s.saveBtn}>Сохранить</button>
-          <button onClick={onCancelEdit} className={s.cancelBtn}>Отмена</button>
+          <button type="button" onClick={onSaveEdit} className={s.saveBtn}>Сохранить</button>
+          <button type="button" onClick={onCancelEdit} className={s.cancelBtn}>Отмена</button>
         </div>
       </div>
     );
@@ -87,16 +87,20 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
       <div className={s.topRow}>
         <div className={s.badges}>
           <span className={s.rank} style={{ background: barColor }}>#{index + 1}</span>
-          <span onClick={cycleStatus} className={s.statusBadge}
+          <button
+            type="button"
+            onClick={cycleStatus}
+            className={s.statusBadge}
+            aria-label={`Изменить статус фичи "${feature.name}"`}
             style={{ background: st.bg, color: st.color, borderColor: `${st.color}40` }}>
             {st.label}
-          </span>
-          <span onClick={onStartEdit} className={s.featureName}>
+          </button>
+          <button type="button" onClick={onStartEdit} className={s.featureName} aria-label={`Редактировать фичу "${feature.name}"`}>
             {feature.name}
             <span className={s.pencilIcon}><PencilIcon /></span>
-          </span>
+          </button>
         </div>
-        <button onClick={onRemove} className={s.removeBtn}>✕</button>
+        <button type="button" onClick={onRemove} className={s.removeBtn} aria-label={`Удалить фичу "${feature.name}"`}>✕</button>
       </div>
       {feature.desc && <p className={s.desc}>{feature.desc}</p>}
       <div className={s.metrics}>
