@@ -15,9 +15,8 @@ export default function Home() {
   return (
     <div className={s.container}>
       <div className={s.hero}>
-        <p className={s.welcome}>Добро пожаловать!</p>
         <h1 className={s.title}>ProductHub</h1>
-        <p className={s.subtitle}>Инструменты для продакт-менеджеров</p>
+        <p className={s.subtitle}>Добро пожаловать! Выбери инструмент для работы</p>
       </div>
 
       <div className={s.grid}>

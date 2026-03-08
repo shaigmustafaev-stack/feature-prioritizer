@@ -1,37 +1,32 @@
 .container {
   max-width: 860px;
   margin: 0 auto;
-  padding: 48px 20px 60px;
+  padding: 0 20px 40px;
   min-height: calc(100vh - 56px);
   color: #e2e8f0;
   display: flex;
   flex-direction: column;
+  justify-content: center;
 }
 
 /* ─── Hero ─── */
 .hero {
   text-align: center;
-  margin-bottom: 40px;
-}
-
-.welcome {
-  font-size: 13px;
-  color: #475569;
-  margin: 0 0 8px;
+  margin-bottom: 32px;
 }
 
 .title {
   font-size: 40px;
   font-weight: 800;
   color: #fff;
-  margin: 0;
+  margin: 0 0 8px;
   letter-spacing: -1px;
 }
 
 .subtitle {
   color: #64748b;
-  margin-top: 10px;
-  font-size: 15px;
+  margin: 0;
+  font-size: 14px;
 }
 
 /* ─── Grid ─── */
@@ -39,27 +34,30 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 16px;
+  justify-items: center;
 }
 
 /* ─── Card ─── */
 .card {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 20px;
   background: #1e293b;
-  border: 1px solid #1e293b;
+  border: 1px solid #253347;
   border-radius: 16px;
   padding: 24px 20px;
   min-height: 180px;
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.2s, box-shadow 0.2s;
   cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 
 .card:hover {
   border-color: #6366f1;
-  box-shadow: 0 0 0 1px #6366f130, 0 4px 24px #6366f118;
+  box-shadow: 0 8px 32px #6366f122;
+  transform: translateY(-4px);
 }
 
 .cardIcon {
@@ -102,21 +100,23 @@
 
 .card:hover .cardArrow {
   color: #818cf8;
-  transform: translateX(3px);
+  transform: translateX(4px);
 }
 
 /* ─── Coming soon ─── */
 .comingSoon {
-  margin-top: 32px;
+  margin-top: 28px;
   text-align: center;
   font-size: 12px;
-  color: #334155;
+  color: #1e293b;
 }
 
 /* ─── Mobile ─── */
 @media (max-width: 639px) {
   .container {
-    padding: 32px 16px 48px;
+    padding: 0 16px 40px;
+    justify-content: flex-start;
+    padding-top: 40px;
   }
   .title {
     font-size: 30px;
