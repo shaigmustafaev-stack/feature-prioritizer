@@ -4,12 +4,20 @@
   padding: 48px 20px 60px;
   min-height: calc(100vh - 56px);
   color: #e2e8f0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ─── Hero ─── */
 .hero {
   text-align: center;
-  margin-bottom: 48px;
+  margin-bottom: 40px;
+}
+
+.welcome {
+  font-size: 13px;
+  color: #475569;
+  margin: 0 0 8px;
 }
 
 .title {
@@ -37,32 +45,33 @@
 .card {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   background: #1e293b;
   border: 1px solid #1e293b;
-  border-radius: 14px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 24px 20px;
+  min-height: 180px;
   text-decoration: none;
   color: inherit;
-  transition: border-color 0.15s, background 0.15s;
+  transition: border-color 0.2s, box-shadow 0.2s;
   cursor: pointer;
 }
 
 .card:hover {
   border-color: #6366f1;
-  background: #1e293bcc;
+  box-shadow: 0 0 0 1px #6366f130, 0 4px 24px #6366f118;
 }
 
 .cardIcon {
-  font-size: 28px;
+  font-size: 48px;
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
+  width: 72px;
+  height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #0f172a;
-  border-radius: 10px;
+  border-radius: 14px;
 }
 
 .cardBody {
@@ -71,28 +80,37 @@
 }
 
 .cardTitle {
-  margin: 0 0 4px;
-  font-size: 15px;
+  margin: 0 0 6px;
+  font-size: 16px;
   font-weight: 600;
   color: #f1f5f9;
 }
 
 .cardDesc {
   margin: 0;
-  font-size: 12px;
+  font-size: 13px;
   color: #64748b;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .cardArrow {
-  font-size: 16px;
-  color: #334155;
+  font-size: 20px;
+  color: #475569;
   flex-shrink: 0;
-  transition: color 0.15s;
+  transition: color 0.2s, transform 0.2s;
 }
 
 .card:hover .cardArrow {
-  color: #6366f1;
+  color: #818cf8;
+  transform: translateX(3px);
+}
+
+/* ─── Coming soon ─── */
+.comingSoon {
+  margin-top: 32px;
+  text-align: center;
+  font-size: 12px;
+  color: #334155;
 }
 
 /* ─── Mobile ─── */
@@ -105,5 +123,13 @@
   }
   .grid {
     grid-template-columns: 1fr;
+  }
+  .card {
+    min-height: 140px;
+  }
+  .cardIcon {
+    font-size: 36px;
+    width: 56px;
+    height: 56px;
   }
 }

@@ -15,6 +15,7 @@ export default function Home() {
   return (
     <div className={s.container}>
       <div className={s.hero}>
+        <p className={s.welcome}>Добро пожаловать!</p>
         <h1 className={s.title}>ProductHub</h1>
         <p className={s.subtitle}>Инструменты для продакт-менеджеров</p>
       </div>
@@ -31,6 +32,8 @@ export default function Home() {
           </Link>
         ))}
       </div>
+
+      <p className={s.comingSoon}>Больше инструментов — скоро</p>
     </div>
   );
 }
