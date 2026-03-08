@@ -103,35 +103,36 @@ export default function Home() {
       {/* Header */}
       <div className={s.header}>
         <h1 className={s.title}>🎯 Приоритизатор фич</h1>
-        <p className={s.subtitle}>Оцени фичи — получи приоритет для команды</p>
         <div className={s.modeToggle}>
           {(["RICE", "ICE"] as ScoringMode[]).map(m => (
-            <button type="button" key={m} onClick={() => setMode(m)} className={mode === m ? s.modeBtnActive : s.modeBtn}>
-              {m}
-            </button>
+            <span key={m} className={s.modeItem}>
+              <button type="button" onClick={() => setMode(m)} className={mode === m ? s.modeBtnActive : s.modeBtn}>
+                {m}
+              </button>
+              <Tooltip text={m === "RICE"
+                ? "RICE = (Охват × Влияние × Уверенность%) ÷ Трудозатраты"
+                : "ICE = Влияние × Уверенность% × (10 ÷ Трудозатраты)"}
+              />
+            </span>
           ))}
         </div>
-        <p className={s.formula}>
-          {isIce ? "ICE = Влияние × Уверенность% × (10 ÷ Трудозатраты)" : "RICE = (Охват × Влияние × Уверенность%) ÷ Трудозатраты"}
-        </p>
       </div>
 
       {/* Form */}
       <div className={s.formCard}>
-        <h3 className={s.formTitle}>➕ Новая фича</h3>
-
-        <div className={s.fieldGroup}>
-          <label className={s.label}>Название *</label>
-          <input placeholder="Например: Онбординг новых пользователей" value={form.name}
-            onChange={e => { setForm({ ...form, name: e.target.value }); setErrors({ ...errors, name: undefined }); }}
-            className={errors.name ? s.inputError : s.input} />
-          {errors.name && <div className={s.error}>{errors.name}</div>}
-        </div>
-
-        <div className={s.fieldGroupDesc}>
-          <label className={s.label}>Какую проблему решает? (необязательно)</label>
-          <input placeholder="Например: пользователи уходят на втором шаге" value={form.desc}
-            onChange={e => setForm({ ...form, desc: e.target.value })} className={s.input} />
+        <div className={s.nameDescRow}>
+          <div>
+            <label className={s.label}>Название *</label>
+            <input placeholder="Например: Онбординг новых пользователей" value={form.name}
+              onChange={e => { setForm({ ...form, name: e.target.value }); setErrors({ ...errors, name: undefined }); }}
+              className={errors.name ? s.inputError : s.input} />
+            {errors.name && <div className={s.error}>{errors.name}</div>}
+          </div>
+          <div>
+            <label className={s.label}>Какую проблему решает? (необязательно)</label>
+            <input placeholder="Например: пользователи уходят на втором шаге" value={form.desc}
+              onChange={e => setForm({ ...form, desc: e.target.value })} className={s.input} />
+          </div>
         </div>
 
         <div className={s.fieldsGrid}>
