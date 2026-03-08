@@ -25,15 +25,21 @@ npm run build     # проверить TypeScript и сборку
 git push          # деплой на Vercel
 ```
 
-Перед коммитом всегда запускать `npm run build` — убедиться что нет TypeScript-ошибок.
+## Перед каждым пушем
+Всегда запускать `npm run build` и `npm test` перед коммитом. Если есть ошибки — починить, потом пушить.
 
 ## Структура проекта
 ```
 app/
-  page.tsx                  # главная страница — RICE/ICE приоритизатор
-  page.module.css           # стили страницы
-  layout.tsx                # общий layout
+  page.tsx                  # главная страница — витрина инструментов (ProductHub)
+  page.module.css           # стили главной страницы
+  layout.tsx                # общий layout (включает Navbar)
   globals.css               # глобальные стили и ресеты
+
+  tools/
+    rice/
+      page.tsx              # приоритизатор фич (RICE/ICE)
+      page.module.css       # стили приоритизатора
 
   lib/
     types.ts                # все TypeScript-типы: Feature, Status, ScoringMode, FormState и др.
@@ -44,6 +50,7 @@ app/
     useFeatures.ts          # управление бэклогом (useState + localStorage)
 
   components/
+    Navbar.tsx / .module.css        # навигационная панель (Client Component, usePathname)
     FeatureCard.tsx / .module.css   # карточка фичи: просмотр + встроенное редактирование
     NumberInput.tsx / .module.css   # числовой инпут с кнопками +/−
     Tooltip.tsx / .module.css       # тултип при наведении
