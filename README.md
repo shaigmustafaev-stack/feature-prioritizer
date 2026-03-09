@@ -14,8 +14,9 @@
 
 ## Технологии
 - Next.js 16 (App Router), React 19, TypeScript
-- CSS Modules
+- Tailwind CSS 4 + shadcn/ui
 - Vitest + Testing Library
+- Playwright (smoke e2e)
 
 ## Быстрый старт
 ```bash
@@ -32,6 +33,13 @@ npm run build
 ```
 
 Перед пушем в `main` запускать обе команды.
+
+Опциональная браузерная проверка UI:
+```bash
+npm run test:e2e
+```
+
+Подробнее: [E2E.md](./E2E.md)
 
 ## Структура
 ```text
