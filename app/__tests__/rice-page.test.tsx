@@ -66,7 +66,7 @@ describe("RicePage integration", () => {
     await userEvent.click(screen.getByRole("button", { name: "Добавить в бэклог" }));
 
     expect(screen.getByText("Введи название фичи")).toBeInTheDocument();
-    expect(screen.getAllByText("Укажи число больше 0")).toHaveLength(2);
+    expect(screen.queryByText("Укажи число больше 0")).not.toBeInTheDocument();
   }, 10000);
 
   it("добавляет новую фичу в бэклог", async () => {

@@ -27,5 +27,5 @@ export const DEMO_FEATURES: Feature[] = [
 ];
 
 export const EMPTY_FORM: FormState = {
-  name: "", desc: "", reach: "", impact: "1", confidence: "80", effort: "",
+  name: "", desc: "", reach: "1000", impact: "1", confidence: "80", effort: "2",
 };
