@@ -59,3 +59,8 @@ app/
 - Аналитика и feedback-модуль
 
 Подробный план: [PRD.md](./PRD.md), инженерные правила: [CLAUDE.md](./CLAUDE.md).
+
+## Процесс коммитов
+- Правила: [COMMIT_GUIDELINES.md](./COMMIT_GUIDELINES.md)
+- Шаблон: [COMMIT_TEMPLATE.md](./COMMIT_TEMPLATE.md)
+- История этапов: [CHANGELOG.md](./CHANGELOG.md)
