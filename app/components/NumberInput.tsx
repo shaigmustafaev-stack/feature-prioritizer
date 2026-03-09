@@ -1,4 +1,6 @@
-import s from "./NumberInput.module.css";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface Props {
   value: string;
@@ -14,24 +16,42 @@ export function NumberInput({ value, onChange, placeholder, step = 1, min = 0, d
   const decrement = () => onChange(String(Math.max(min, (Number(value) || 0) - step)));
   const increment = () => onChange(String((Number(value) || 0) + step));
 
-  const borderColor = error ? "#ef4444" : disabled ? "#1e293b" : "#334155";
-
   return (
-    <div className={disabled ? s.wrapperDisabled : s.wrapper} style={{ border: `1px solid ${borderColor}` }}>
-      <button type="button" disabled={disabled} onClick={decrement} className={disabled ? s.btnDisabled : s.btn} aria-label="Уменьшить значение">
+    <div className={cn(
+      "flex overflow-hidden rounded-lg border",
+      error ? "border-destructive" : disabled ? "border-muted" : "border-border",
+      disabled && "opacity-35"
+    )}>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        disabled={disabled}
+        onClick={decrement}
+        className="h-auto w-9 shrink-0 rounded-none border-none bg-secondary text-lg text-muted-foreground hover:bg-secondary/80"
+        aria-label="Уменьшить значение"
+      >
         −
-      </button>
-      <input
+      </Button>
+      <Input
         type="number"
         disabled={disabled}
         placeholder={placeholder}
         value={value}
         onChange={e => onChange(e.target.value)}
-        className={disabled ? s.inputDisabled : s.input}
+        className="flex-1 rounded-none border-none bg-background text-center text-sm text-foreground shadow-none focus-visible:ring-0"
       />
-      <button type="button" disabled={disabled} onClick={increment} className={disabled ? s.btnDisabled : s.btn} aria-label="Увеличить значение">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        disabled={disabled}
+        onClick={increment}
+        className="h-auto w-9 shrink-0 rounded-none border-none bg-secondary text-lg text-muted-foreground hover:bg-secondary/80"
+        aria-label="Увеличить значение"
+      >
         +
-      </button>
+      </Button>
     </div>
   );
 }

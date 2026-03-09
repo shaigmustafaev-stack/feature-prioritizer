@@ -1,5 +1,5 @@
 import Link from "next/link";
-import s from "./page.module.css";
+import { Card } from "@/components/ui/card";
 
 const tools = [
   {
@@ -13,26 +13,42 @@ const tools = [
 
 export default function Home() {
   return (
-    <div className={s.container}>
-      <div className={s.hero}>
-        <h1 className={s.title}>ProductHub</h1>
-        <p className={s.subtitle}>Добро пожаловать! Выбери инструмент для работы</p>
+    <div className="mx-auto flex min-h-[calc(100vh-56px)] max-w-[860px] flex-col justify-center px-5 pb-10 max-sm:justify-start max-sm:px-4 max-sm:pt-10">
+      <div className="mb-8 text-center">
+        <h1 className="mb-2 text-4xl font-extrabold tracking-tight text-foreground max-sm:text-3xl">
+          ProductHub
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Добро пожаловать! Выбери инструмент для работы
+        </p>
       </div>
 
-      <div className={s.grid}>
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] justify-items-center gap-4 max-sm:grid-cols-1">
         {tools.map(tool => (
-          <Link key={tool.href} href={tool.href} className={s.card}>
-            <div className={s.cardIcon}>{tool.icon}</div>
-            <div className={s.cardBody}>
-              <h2 className={s.cardTitle}>{tool.title}</h2>
-              <p className={s.cardDesc}>{tool.desc}</p>
-            </div>
-            <div className={s.cardArrow}>→</div>
+          <Link key={tool.href} href={tool.href} className="w-full no-underline">
+            <Card className="flex w-full cursor-pointer items-center gap-5 border-border p-5 min-h-[180px] transition-all hover:border-primary hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 max-sm:min-h-[140px]">
+              <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-xl bg-background text-5xl max-sm:h-14 max-sm:w-14 max-sm:text-4xl">
+                {tool.icon}
+              </div>
+              <div className="min-w-0 flex-1">
+                <h2 className="mb-1.5 text-base font-semibold text-foreground">
+                  {tool.title}
+                </h2>
+                <p className="text-[13px] leading-relaxed text-muted-foreground">
+                  {tool.desc}
+                </p>
+              </div>
+              <div className="shrink-0 text-xl text-muted-foreground transition-all group-hover:translate-x-1 group-hover:text-primary">
+                →
+              </div>
+            </Card>
           </Link>
         ))}
       </div>
 
-      <p className={s.comingSoon}>Больше инструментов — скоро</p>
+      <p className="mt-7 text-center text-xs text-muted-foreground/30">
+        Больше инструментов — скоро
+      </p>
     </div>
   );
 }

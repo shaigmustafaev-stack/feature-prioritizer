@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { Navbar } from "./components/Navbar";
 import "./globals.css";
 
 const geistSans = Geist({
-  variable: "--font-geist-sans",
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
@@ -28,8 +29,10 @@ export default function RootLayout({
       <body suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Navbar />
-        {children}
+        <TooltipProvider>
+          <Navbar />
+          {children}
+        </TooltipProvider>
       </body>
     </html>
   );
