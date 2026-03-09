@@ -55,7 +55,7 @@ export function useFeatures() {
                   effort: f.effort,
                   status: f.status,
                 }),
-              }).then(r => r.json() as Promise<Feature>)
+              }).then(r => { if (!r.ok) throw new Error("Ошибка создания демо-фичи"); return r.json() as Promise<Feature>; })
             )
           );
           markDemoSeeded(id);
