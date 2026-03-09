@@ -134,7 +134,7 @@ export default function Home() {
       </div>
 
       {/* KPI — десктоп: карточки, мобиль: компактная строка */}
-      <div className="mb-4 grid grid-cols-4 gap-2 max-sm:hidden">
+      <div className="mb-4 grid grid-cols-4 gap-2 max-md:hidden">
         <Card>
           <CardContent className="px-3 py-2">
             <p className="text-[11px] text-muted-foreground">Всего фич</p>
@@ -160,7 +160,7 @@ export default function Home() {
           </CardContent>
         </Card>
       </div>
-      <p className="mb-3 hidden text-xs text-muted-foreground max-sm:block">
+      <p className="mb-3 hidden text-xs text-muted-foreground max-md:block">
         Фич: {features.length} · В работе: {inProgressCount} · Готово: {doneCount} · Топ: {topScore}
       </p>
 
@@ -192,7 +192,7 @@ export default function Home() {
 
           <div className="grid grid-cols-2 gap-2 max-sm:gap-1.5">
             <div>
-              <label className={`mb-1 flex items-center gap-1 text-sm font-medium ${isIce ? "text-foreground/35" : "text-foreground"}`}>
+              <label className={`mb-1 flex items-center gap-1 text-sm font-medium max-md:text-base ${isIce ? "text-foreground/35" : "text-foreground"}`}>
                 📊 Охват
                 <InfoTip text="Сколько пользователей столкнётся с этой фичей в месяц. Чем больше охват — тем выше скор." />
               </label>
@@ -201,7 +201,7 @@ export default function Home() {
               {errors.reach && <div className="mt-0.5 text-[11px] text-destructive">{errors.reach}</div>}
             </div>
             <div>
-              <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground">
+              <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground max-md:text-base">
                 💥 Влияние
                 <InfoTip text="Насколько сильно фича изменит поведение или опыт пользователя. 3 — трансформирует продукт, 0.25 — едва заметно." />
               </label>
@@ -215,7 +215,7 @@ export default function Home() {
               </Select>
             </div>
             <div>
-              <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground">
+              <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground max-md:text-base">
                 🎯 Уверенность
                 <InfoTip text="Насколько ты уверен в оценках охвата и влияния. 100% — есть данные, 10% — чистая интуиция." />
               </label>
@@ -229,7 +229,7 @@ export default function Home() {
               </Select>
             </div>
             <div>
-              <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground">
+              <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground max-md:text-base">
                 ⚡ Трудозатраты (чел-мес)
                 <InfoTip text="Сколько человеко-месяцев займёт реализация. 0.5 — пара недель одного разработчика, 3 — квартал команды." />
               </label>

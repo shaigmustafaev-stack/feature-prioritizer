@@ -29,7 +29,7 @@ export function NumberInput({ id, value, onChange, placeholder, step = 1, min = 
         size="icon"
         disabled={disabled}
         onClick={decrement}
-        className="h-auto w-9 shrink-0 rounded-none border-none bg-secondary text-lg text-muted-foreground hover:bg-secondary/80"
+        className="h-11 w-11 shrink-0 rounded-none border-none bg-secondary text-lg text-muted-foreground hover:bg-secondary/80 md:h-auto md:w-9"
         aria-label="Уменьшить значение"
       >
         −
@@ -41,7 +41,7 @@ export function NumberInput({ id, value, onChange, placeholder, step = 1, min = 
         placeholder={placeholder}
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="flex-1 rounded-none border-none bg-background text-center text-sm text-foreground shadow-none focus-visible:ring-0"
+        className="h-11 flex-1 rounded-none border-none bg-background text-center text-sm text-foreground shadow-none focus-visible:ring-0 md:h-auto"
       />
       <Button
         type="button"
@@ -49,7 +49,7 @@ export function NumberInput({ id, value, onChange, placeholder, step = 1, min = 
         size="icon"
         disabled={disabled}
         onClick={increment}
-        className="h-auto w-9 shrink-0 rounded-none border-none bg-secondary text-lg text-muted-foreground hover:bg-secondary/80"
+        className="h-11 w-11 shrink-0 rounded-none border-none bg-secondary text-lg text-muted-foreground hover:bg-secondary/80 md:h-auto md:w-9"
         aria-label="Увеличить значение"
       >
         +

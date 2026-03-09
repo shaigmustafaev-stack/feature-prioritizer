@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calcRice, calcIce, getScore, getBarColor, validateFeature, buildCsv } from "../lib/utils";
+import { calcRice, calcIce, getScore, getBarColor, validateFeature, buildCsv, getImpactLabel, getConfLabel } from "../lib/utils";
 import type { Feature, FormState } from "../lib/types";
 
 const makeFeature = (overrides: Partial<Feature> = {}): Feature => ({
@@ -161,5 +161,21 @@ describe("buildCsv", () => {
   it("статус 'in-progress' отображается как 'В работе'", () => {
     const csv = buildCsv([makeFeature({ status: "in-progress" })]);
     expect(csv).toContain("В работе");
+  });
+});
+
+// ─── labels ─────────────────────────────────────────────────────────────
+describe("label helpers", () => {
+  it("возвращает полный label для impact", () => {
+    expect(getImpactLabel("1")).toContain("Среднее");
+  });
+
+  it("возвращает полный label для confidence", () => {
+    expect(getConfLabel("80")).toContain("Уверен");
+  });
+
+  it("возвращает исходное значение, если нет маппинга", () => {
+    expect(getImpactLabel("999")).toBe("999");
+    expect(getConfLabel("999")).toBe("999");
   });
 });

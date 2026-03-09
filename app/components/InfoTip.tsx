@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useId } from "react";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 
 interface Props {
@@ -11,11 +11,13 @@ interface Props {
 export function InfoTip({ text }: Props) {
   const [open, setOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const tipId = useId();
 
   useEffect(() => {
     if (!open) return;
     const handler = (e: PointerEvent) => {
-      if (triggerRef.current && !triggerRef.current.contains(e.target as Node)) {
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest(`[data-infotip="${tipId}"]`)) {
         setOpen(false);
       }
     };
@@ -28,12 +30,14 @@ export function InfoTip({ text }: Props) {
       <TooltipTrigger
         ref={triggerRef}
         type="button"
-        className="inline-flex h-4 w-4 cursor-help items-center justify-center rounded-full border border-border text-[10px] text-muted-foreground transition-colors hover:border-primary hover:text-primary"
+        data-infotip={tipId}
+        aria-label="Показать подсказку"
+        className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-border text-[11px] text-muted-foreground transition-colors hover:border-primary hover:text-primary md:h-4 md:w-4 md:text-[10px]"
         onClick={() => setOpen(v => !v)}
       >
         ?
       </TooltipTrigger>
-      <TooltipContent>{text}</TooltipContent>
+      <TooltipContent data-infotip={tipId}>{text}</TooltipContent>
     </Tooltip>
   );
 }
