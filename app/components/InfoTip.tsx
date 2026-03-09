@@ -41,7 +41,7 @@ export function InfoTip({ text }: Props) {
         aria-label="Показать подсказку"
         aria-expanded={open}
         aria-describedby={open ? tipId : undefined}
-        className="inline-flex h-7 w-7 cursor-pointer items-center justify-center text-muted-foreground/50 transition-colors hover:text-primary active:text-primary sm:h-5 sm:w-5"
+        className="inline-flex h-8 w-8 cursor-pointer items-center justify-center text-muted-foreground/50 transition-colors hover:text-primary active:text-primary sm:h-5 sm:w-5"
         onPointerDown={e => {
           e.preventDefault();
           setOpen(v => !v);

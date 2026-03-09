@@ -198,7 +198,7 @@ export default function Home() {
 
           <div className="grid grid-cols-2 gap-2 max-sm:gap-1.5">
             <div data-testid="field-reach" className="max-sm:order-1">
-              <label className={`mb-1 flex items-center gap-1 text-sm font-medium max-md:text-base ${isIce ? "text-foreground/35" : "text-foreground"}`}>
+              <label className={`mb-1 flex items-center gap-0.5 text-sm font-medium max-md:text-base ${isIce ? "text-foreground/35" : "text-foreground"}`}>
                 📊 Охват
                 <InfoTip text="Пользователей затронет фича в месяц. Больше = выше скор." />
               </label>
@@ -207,7 +207,7 @@ export default function Home() {
               {errors.reach && <div className="mt-0.5 text-[11px] text-destructive">{errors.reach}</div>}
             </div>
             <div data-testid="field-impact" className="max-sm:order-3">
-              <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground max-md:text-base">
+              <label className="mb-1 flex items-center gap-0.5 text-sm font-medium text-foreground max-md:text-base">
                 💥 Влияние
                 <InfoTip text="Сила изменения опыта. 3 — трансформирует, 0.25 — едва заметно." />
               </label>
@@ -221,7 +221,7 @@ export default function Home() {
               </Select>
             </div>
             <div data-testid="field-confidence" className="max-sm:order-4">
-              <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground max-md:text-base">
+              <label className="mb-1 flex items-center gap-0.5 text-sm font-medium text-foreground max-md:text-base">
                 🎯 Уверенность
                 <InfoTip text="Уверенность в оценках. 100% — данные, 10% — интуиция." />
               </label>
@@ -235,7 +235,7 @@ export default function Home() {
               </Select>
             </div>
             <div data-testid="field-effort" className="max-sm:order-2">
-              <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground max-md:text-base">
+              <label className="mb-1 flex items-center gap-0.5 text-sm font-medium text-foreground max-md:text-base">
                 ⚡ Трудозатраты<span className="max-sm:hidden"> (чел-мес)</span>
                 <InfoTip text="Человеко-месяцев на реализацию. 0.5 — пара недель, 3 — квартал команды." />
               </label>
