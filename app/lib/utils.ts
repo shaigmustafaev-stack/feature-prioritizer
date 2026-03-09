@@ -32,6 +32,12 @@ export const getImpactLabel = (val: string): string =>
 export const getConfLabel = (val: string): string =>
   CONF_OPTIONS.find(o => String(o.val) === val)?.label ?? val;
 
+export const formatScore = (score: number): string => {
+  if (score >= 10000) return `${Math.round(score / 1000)}K`;
+  if (score >= 1000) return `${(score / 1000).toFixed(1).replace(/\.0$/, "")}K`;
+  return String(score);
+};
+
 export const buildCsv = (features: Feature[]): string => {
   const header = ["#", "Название", "Описание", "Статус", "Охват", "Влияние", "Уверенность %", "Трудозатраты (мес)", "RICE", "ICE"];
   const rows = features.map((f, i) => [

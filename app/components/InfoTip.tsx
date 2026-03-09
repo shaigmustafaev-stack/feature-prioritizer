@@ -32,7 +32,7 @@ export function InfoTip({ text }: Props) {
         type="button"
         data-infotip={tipId}
         aria-label="Показать подсказку"
-        className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-border text-[11px] text-muted-foreground transition-colors hover:border-primary hover:text-primary md:h-4 md:w-4 md:text-[10px]"
+        className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-border text-[11px] text-muted-foreground transition-colors hover:border-primary hover:text-primary md:h-6 md:w-6 md:text-[11px]"
         onClick={() => setOpen(v => !v)}
       >
         ?

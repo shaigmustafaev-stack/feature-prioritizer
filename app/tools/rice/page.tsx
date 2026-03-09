@@ -7,7 +7,7 @@ import { NumberInput } from "../../components/NumberInput";
 import { STATUSES } from "../../lib/types";
 import type { Status, ScoringMode, FormState, FormErrors, Feature } from "../../lib/types";
 import { IMPACT_SCALE, CONF_OPTIONS, STATUS_CYCLE, EMPTY_FORM, DEFAULT_REACH } from "../../lib/constants";
-import { getScore, getBarColor, validateFeature, buildCsv, getImpactLabel, getConfLabel } from "../../lib/utils";
+import { getScore, getBarColor, validateFeature, buildCsv, getImpactLabel, getConfLabel, formatScore } from "../../lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -27,6 +27,7 @@ export default function Home() {
   const [justAdded, setJustAdded] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
   const [filterStatus, setFilterStatus] = useState<Status | "all">("all");
+  const [sortBy, setSortBy] = useState<"score" | "date">("score");
 
   const isIce = mode === "ICE";
 
@@ -77,7 +78,9 @@ export default function Home() {
     }
   };
 
-  const sorted = [...features].sort((a, b) => getScore(b, mode) - getScore(a, mode));
+  const sorted = sortBy === "score"
+    ? [...features].sort((a, b) => getScore(b, mode) - getScore(a, mode))
+    : [...features].sort((a, b) => b.id - a.id);
   const maxScore = sorted.length ? getScore(sorted[0], mode) : 1;
   const filtered = filterStatus === "all" ? sorted : sorted.filter(f => f.status === filterStatus);
   const doneCount = features.filter(f => f.status === "done").length;
@@ -111,7 +114,7 @@ export default function Home() {
       <div className="mb-3 flex items-center justify-between gap-3 max-sm:flex-col max-sm:items-start">
         <div>
           <h1 className="text-xl font-bold text-foreground">🎯 Приоритизатор фич</h1>
-          <p className="mt-0.5 text-xs text-muted-foreground">
+          <p className="mt-0.5 text-sm text-muted-foreground md:text-xs">
             Оценивай фичи и принимай решения по приоритетам быстрее.
           </p>
         </div>
@@ -137,31 +140,31 @@ export default function Home() {
       <div className="mb-4 grid grid-cols-4 gap-2 max-md:hidden">
         <Card>
           <CardContent className="px-3 py-2">
-            <p className="text-[11px] text-muted-foreground">Всего фич</p>
+            <p className="text-sm text-muted-foreground md:text-[11px]">Всего фич</p>
             <p className="text-lg font-bold">{features.length}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="px-3 py-2">
-            <p className="text-[11px] text-muted-foreground">В работе</p>
+            <p className="text-sm text-muted-foreground md:text-[11px]">В работе</p>
             <p className="text-lg font-bold">{inProgressCount}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="px-3 py-2">
-            <p className="text-[11px] text-muted-foreground">Готово</p>
+            <p className="text-sm text-muted-foreground md:text-[11px]">Готово</p>
             <p className="text-lg font-bold">{doneCount}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="px-3 py-2">
-            <p className="text-[11px] text-muted-foreground">Топ {mode}-скор</p>
-            <p className="text-lg font-bold">{topScore}</p>
+            <p className="text-sm text-muted-foreground md:text-[11px]">Топ {mode}-скор</p>
+            <p className="text-lg font-bold">{formatScore(topScore)}</p>
           </CardContent>
         </Card>
       </div>
-      <p className="mb-3 hidden text-xs text-muted-foreground max-md:block">
-        Фич: {features.length} · В работе: {inProgressCount} · Готово: {doneCount} · Топ: {topScore}
+      <p className="mb-3 hidden text-sm text-muted-foreground max-md:block">
+        Фич: {features.length} · В работе: {inProgressCount} · Готово: {doneCount} · Топ: {formatScore(topScore)}
       </p>
 
       {/* Form */}
@@ -175,6 +178,8 @@ export default function Home() {
                 placeholder="Например: Онбординг новых пользователей"
                 value={form.name}
                 onChange={e => { setForm({ ...form, name: e.target.value }); setErrors({ ...errors, name: undefined }); }}
+                onBlur={() => { if (!form.name.trim()) setErrors(e => ({ ...e, name: "Введи название фичи" })); }}
+                onKeyDown={e => { if (e.key === "Enter") handleAddFeature(); }}
                 aria-invalid={!!errors.name}
               />
               {errors.name && <div className="mt-0.5 text-[11px] text-destructive">{errors.name}</div>}
@@ -236,20 +241,23 @@ export default function Home() {
               <NumberInput id="feature-effort" value={form.effort} placeholder="2" step={0.5} min={0.25} error={errors.effort}
                 onChange={v => { setForm({ ...form, effort: v }); setErrors({ ...errors, effort: undefined }); }} />
               {errors.effort && <div className="mt-0.5 text-[11px] text-destructive">{errors.effort}</div>}
+              {!form.effort && form.name && !errors.effort && (
+                <div className="mt-0.5 text-[11px] text-muted-foreground/60">Введи — увидишь прогноз скора</div>
+              )}
             </div>
           </div>
 
           {previewScore !== null && (
             <div className="flex animate-in fade-in slide-in-from-top-1 items-center justify-between rounded-lg border bg-background p-2.5" style={{ borderColor: `${previewColor}40` }}>
               <div>
-                <div className="text-[11px] text-muted-foreground">Прогноз {mode}-скора</div>
-                <div className="text-xs text-muted-foreground/70">
+                <div className="text-xs text-muted-foreground">Прогноз {mode}-скора</div>
+                <div className="text-sm text-muted-foreground/70 md:text-xs">
                   {previewRank === 1 && sorted.length > 0 ? "🥇 Войдёт на 1-е место"
                     : previewRank !== null && sorted.length > 0 ? `📍 Место в бэклоге: #${previewRank} из ${sorted.length + 1}`
                     : "📍 Первая фича в бэклоге"}
                 </div>
               </div>
-              <span className="text-2xl font-extrabold leading-none" style={{ color: previewColor }}>{previewScore}</span>
+              <span className="text-2xl font-extrabold leading-none" style={{ color: previewColor }}>{previewScore !== null ? formatScore(previewScore) : null}</span>
             </div>
           )}
 
@@ -266,10 +274,10 @@ export default function Home() {
       {/* Backlog */}
       <div>
         <div className="mb-3 flex items-center justify-between gap-2 max-sm:flex-col max-sm:items-start">
-          <h3 className="text-[15px] font-semibold text-muted-foreground">📋 Бэклог ({sorted.length})</h3>
+          <h2 className="text-[15px] font-semibold text-muted-foreground">📋 Бэклог ({sorted.length})</h2>
           <div className="flex flex-wrap items-center gap-2.5">
             {sorted.length > 0 && (
-              <Button variant="outline" size="sm" onClick={handleExportCsv}>
+              <Button variant="outline" size="sm" onClick={handleExportCsv} className="animate-in fade-in duration-200">
                 📥 Скачать CSV
               </Button>
             )}
@@ -278,11 +286,18 @@ export default function Home() {
                 variant={confirmClear ? "destructive" : "outline"}
                 size="sm"
                 onClick={handleClear}
+                className="animate-in fade-in duration-200"
               >
                 {confirmClear ? "Точно удалить?" : "🗑 Очистить"}
               </Button>
             )}
-            <span className="text-xs text-muted-foreground/70">по {mode}-скору ↓</span>
+            <button
+              type="button"
+              onClick={() => setSortBy(s => s === "score" ? "date" : "score")}
+              className="cursor-pointer text-sm text-muted-foreground/70 transition-colors hover:text-muted-foreground md:text-xs"
+            >
+              {sortBy === "score" ? `по ${mode}-скору ↓` : "по дате добавления ↓"}
+            </button>
           </div>
         </div>
 
@@ -295,7 +310,7 @@ export default function Home() {
               const sc = st === "all" ? null : STATUSES[st];
               return (
                 <button type="button" key={st} onClick={() => setFilterStatus(st)}
-                  className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-all hover:border-primary/50 hover:bg-muted"
+                  className="rounded-full border border-border px-3 py-1 text-sm text-muted-foreground transition-all hover:border-primary/50 hover:bg-muted md:text-xs"
                   style={{
                     borderColor: active ? (sc?.color ?? "#6366f1") : undefined,
                     background: active ? (sc ? sc.bg : "#6366f118") : undefined,

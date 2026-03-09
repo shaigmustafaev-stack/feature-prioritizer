@@ -3,7 +3,7 @@
 import { STATUSES } from "../lib/types";
 import type { Feature, Status, FormState, ScoringMode } from "../lib/types";
 import { IMPACT_SCALE, CONF_OPTIONS, STATUS_CYCLE } from "../lib/constants";
-import { getImpactLabel, getConfLabel } from "../lib/utils";
+import { getImpactLabel, getConfLabel, formatScore } from "../lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -58,12 +58,12 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
             id={`edit-desc-${feature.id}`}
             value={editForm.desc}
             onChange={e => setEditForm({ ...editForm, desc: e.target.value })}
-            className="text-xs"
+            className="text-sm md:text-xs"
             placeholder="Какую проблему решает?"
           />
           <div className="grid grid-cols-2 gap-2 max-sm:grid-cols-1">
             <div>
-              <label htmlFor={`edit-reach-${feature.id}`} className={`text-[11px] ${isIce ? "text-muted-foreground/35" : "text-muted-foreground"}`}>📊 Охват</label>
+              <label htmlFor={`edit-reach-${feature.id}`} className={`text-xs md:text-[11px] ${isIce ? "text-muted-foreground/35" : "text-muted-foreground"}`}>📊 Охват</label>
               <Input
                 id={`edit-reach-${feature.id}`}
                 type="number"
@@ -73,7 +73,7 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
               />
             </div>
             <div>
-              <label className="text-[11px] text-muted-foreground">💥 Влияние</label>
+              <label className="text-xs text-muted-foreground md:text-[11px]">💥 Влияние</label>
               <Select value={editForm.impact} onValueChange={v => v && setEditForm({ ...editForm, impact: v })}>
                 <SelectTrigger aria-label="Влияние" className="w-full">
                   <SelectValue placeholder="Выбрать">{getImpactLabel(editForm.impact)}</SelectValue>
@@ -84,7 +84,7 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
               </Select>
             </div>
             <div>
-              <label className="text-[11px] text-muted-foreground">🎯 Уверенность</label>
+              <label className="text-xs text-muted-foreground md:text-[11px]">🎯 Уверенность</label>
               <Select value={editForm.confidence} onValueChange={v => v && setEditForm({ ...editForm, confidence: v })}>
                 <SelectTrigger aria-label="Уверенность" className="w-full">
                   <SelectValue placeholder="Выбрать">{getConfLabel(editForm.confidence)}</SelectValue>
@@ -95,7 +95,7 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
               </Select>
             </div>
             <div>
-              <label htmlFor={`edit-effort-${feature.id}`} className="text-[11px] text-muted-foreground">⚡ Трудозатраты</label>
+              <label htmlFor={`edit-effort-${feature.id}`} className="text-xs text-muted-foreground md:text-[11px]">⚡ Трудозатраты</label>
               <Input
                 id={`edit-effort-${feature.id}`}
                 type="number"
@@ -122,7 +122,7 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
   const isDimmed = feature.status === "done" || feature.status === "deferred";
 
   return (
-    <Card className={`mb-2.5 transition-colors hover:bg-muted/50 ${isDimmed ? "opacity-60" : ""}`}>
+    <Card className={`mb-2.5 animate-in fade-in slide-in-from-top-2 duration-200 transition-colors hover:bg-muted/50 ${isDimmed ? "opacity-60" : ""}`}>
       <CardContent>
         <div className="mb-1.5 flex items-start justify-between">
           <div className="flex flex-wrap items-center gap-2">
@@ -132,7 +132,7 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
             <button
               type="button"
               onClick={cycleStatus}
-              className="cursor-pointer select-none rounded-full border px-2 py-0.5 text-[11px] font-semibold transition-all hover:brightness-125"
+              className="cursor-pointer select-none rounded-full border px-2 py-0.5 text-xs font-semibold transition-all hover:brightness-125 md:text-[11px]"
               aria-label={`Изменить статус фичи "${feature.name}"`}
               style={{ background: st.bg, color: st.color, borderColor: `${st.color}40` }}
             >
@@ -142,7 +142,7 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
               className="group flex min-w-0 cursor-pointer items-center gap-1.5 border-none bg-transparent p-0 text-left text-sm font-semibold text-foreground transition-colors hover:text-primary"
               aria-label={`Редактировать фичу "${feature.name}"`}>
               <span className="truncate">{feature.name}</span>
-              <span className="text-muted-foreground transition-colors group-hover:text-primary"><PencilIcon /></span>
+              <span className="text-muted-foreground/50 transition-colors group-hover:text-primary group-active:text-primary"><PencilIcon /></span>
             </button>
           </div>
           <Button type="button" variant="ghost" size="icon" onClick={onRemove} aria-label={`Удалить фичу "${feature.name}"`}>
@@ -150,9 +150,9 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
           </Button>
         </div>
 
-        {feature.desc && <p className="mb-1.5 text-xs italic text-muted-foreground">{feature.desc}</p>}
+        {feature.desc && <p className="mb-1.5 text-sm italic text-muted-foreground md:text-xs">{feature.desc}</p>}
 
-        <div className="mb-1.5 flex gap-3.5 text-[11px] text-muted-foreground max-sm:grid max-sm:grid-cols-2 max-sm:gap-x-2.5 max-sm:gap-y-1">
+        <div className="mb-1.5 flex gap-3.5 text-xs text-muted-foreground max-sm:grid max-sm:grid-cols-2 max-sm:gap-x-2.5 max-sm:gap-y-1 md:text-[11px]">
           <span className={isIce ? "opacity-35" : ""}>📊 Охват: {feature.reach}</span>
           <span>💥 Влияние: {feature.impact}</span>
           <span>🎯 Уверенность: {feature.confidence}%</span>
@@ -163,7 +163,7 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
           <div className="h-[7px] flex-1 overflow-hidden rounded bg-background">
             <div className="h-full rounded transition-[width] duration-300" style={{ width: `${barWidth}%`, background: barColor }} />
           </div>
-          <span className="min-w-[55px] text-right text-[15px] font-bold" style={{ color: barColor }}>{score}</span>
+          <span className="min-w-[55px] text-right text-[15px] font-bold" style={{ color: barColor }}>{formatScore(score)}</span>
         </div>
       </CardContent>
     </Card>
