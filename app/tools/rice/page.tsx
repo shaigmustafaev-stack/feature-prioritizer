@@ -80,6 +80,9 @@ export default function Home() {
   const sorted = [...features].sort((a, b) => getScore(b, mode) - getScore(a, mode));
   const maxScore = sorted.length ? getScore(sorted[0], mode) : 1;
   const filtered = filterStatus === "all" ? sorted : sorted.filter(f => f.status === filterStatus);
+  const doneCount = features.filter(f => f.status === "done").length;
+  const inProgressCount = features.filter(f => f.status === "in-progress").length;
+  const topScore = sorted.length > 0 ? getScore(sorted[0], mode) : 0;
 
   const handleExportCsv = () => {
     if (sorted.length === 0) return;
@@ -105,8 +108,13 @@ export default function Home() {
     <div className="mx-auto min-h-screen max-w-[860px] px-5 py-4 max-sm:px-4">
 
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between max-sm:flex-col max-sm:items-start max-sm:gap-2.5">
-        <h1 className="text-xl font-bold text-foreground">🎯 Приоритизатор фич</h1>
+      <div className="mb-3 flex items-center justify-between gap-3 max-sm:flex-col max-sm:items-start">
+        <div>
+          <h1 className="text-xl font-bold text-foreground">🎯 Приоритизатор фич</h1>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Оценивай фичи и принимай решения по приоритетам быстрее.
+          </p>
+        </div>
         <Tabs value={mode} onValueChange={(v) => setMode(v as ScoringMode)}>
           <TabsList>
             <Tooltip>
@@ -124,14 +132,47 @@ export default function Home() {
           </TabsList>
         </Tabs>
       </div>
+      <p className="mb-4 text-xs text-muted-foreground">
+        {mode === "RICE"
+          ? "RICE = (Охват × Влияние × Уверенность%) ÷ Трудозатраты"
+          : "ICE = Влияние × Уверенность% × (10 ÷ Трудозатраты)"}
+      </p>
+
+      <div className="mb-4 grid grid-cols-4 gap-2 max-sm:grid-cols-2">
+        <Card>
+          <CardContent className="px-3 py-2">
+            <p className="text-[11px] text-muted-foreground">Всего фич</p>
+            <p className="text-lg font-bold">{features.length}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="px-3 py-2">
+            <p className="text-[11px] text-muted-foreground">В работе</p>
+            <p className="text-lg font-bold">{inProgressCount}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="px-3 py-2">
+            <p className="text-[11px] text-muted-foreground">Готово</p>
+            <p className="text-lg font-bold">{doneCount}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="px-3 py-2">
+            <p className="text-[11px] text-muted-foreground">Топ {mode}-скор</p>
+            <p className="text-lg font-bold">{topScore}</p>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Form */}
       <Card className="mb-4">
         <CardContent className="space-y-2">
           <div className="grid grid-cols-[3fr_2fr] gap-2 max-sm:grid-cols-1">
             <div>
-              <label className="mb-1 block text-xs text-muted-foreground">Название *</label>
+              <label htmlFor="feature-name" className="mb-1 block text-xs text-muted-foreground">Название *</label>
               <Input
+                id="feature-name"
                 placeholder="Например: Онбординг новых пользователей"
                 value={form.name}
                 onChange={e => { setForm({ ...form, name: e.target.value }); setErrors({ ...errors, name: undefined }); }}
@@ -140,8 +181,9 @@ export default function Home() {
               {errors.name && <div className="mt-0.5 text-[11px] text-destructive">{errors.name}</div>}
             </div>
             <div>
-              <label className="mb-1 block text-xs text-muted-foreground">Какую проблему решает? (необязательно)</label>
+              <label htmlFor="feature-desc" className="mb-1 block text-xs text-muted-foreground">Какую проблему решает? (необязательно)</label>
               <Input
+                id="feature-desc"
                 placeholder="Например: пользователи уходят на втором шаге"
                 value={form.desc}
                 onChange={e => setForm({ ...form, desc: e.target.value })}
@@ -158,7 +200,7 @@ export default function Home() {
                   <TooltipContent>Сколько пользователей столкнётся с этой фичей в месяц. Чем больше охват — тем выше скор.</TooltipContent>
                 </Tooltip>
               </label>
-              <NumberInput value={form.reach} placeholder="1000" step={100} min={0} disabled={isIce} error={errors.reach}
+              <NumberInput id="feature-reach" value={form.reach} placeholder="1000" step={100} min={0} disabled={isIce} error={errors.reach}
                 onChange={v => { setForm({ ...form, reach: v }); setErrors({ ...errors, reach: undefined }); }} />
               {errors.reach && <div className="mt-0.5 text-[11px] text-destructive">{errors.reach}</div>}
             </div>
@@ -171,7 +213,7 @@ export default function Home() {
                 </Tooltip>
               </label>
               <Select value={form.impact} onValueChange={v => v && setForm({ ...form, impact: v })}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger aria-label="Влияние" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -188,7 +230,7 @@ export default function Home() {
                 </Tooltip>
               </label>
               <Select value={form.confidence} onValueChange={v => v && setForm({ ...form, confidence: v })}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger aria-label="Уверенность" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -204,14 +246,14 @@ export default function Home() {
                   <TooltipContent>Сколько человеко-месяцев займёт реализация. 0.5 — пара недель одного разработчика, 3 — квартал команды.</TooltipContent>
                 </Tooltip>
               </label>
-              <NumberInput value={form.effort} placeholder="2" step={0.5} min={0.25} error={errors.effort}
+              <NumberInput id="feature-effort" value={form.effort} placeholder="2" step={0.5} min={0.25} error={errors.effort}
                 onChange={v => { setForm({ ...form, effort: v }); setErrors({ ...errors, effort: undefined }); }} />
               {errors.effort && <div className="mt-0.5 text-[11px] text-destructive">{errors.effort}</div>}
             </div>
           </div>
 
           {previewScore !== null && (
-            <div className="flex animate-in fade-in slide-in-from-top-1 items-center justify-between rounded-lg bg-background p-2.5" style={{ borderColor: `${previewColor}40` }}>
+            <div className="flex animate-in fade-in slide-in-from-top-1 items-center justify-between rounded-lg border bg-background p-2.5" style={{ borderColor: `${previewColor}40` }}>
               <div>
                 <div className="text-[11px] text-muted-foreground">Прогноз {mode}-скора</div>
                 <div className="text-xs text-muted-foreground/70">
@@ -236,9 +278,9 @@ export default function Home() {
 
       {/* Backlog */}
       <div>
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-3 flex items-center justify-between gap-2 max-sm:flex-col max-sm:items-start">
           <h3 className="text-[15px] font-semibold text-muted-foreground">📋 Бэклог ({sorted.length})</h3>
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2.5">
             {sorted.length > 0 && (
               <Button variant="outline" size="sm" onClick={handleExportCsv}>
                 📥 Скачать CSV

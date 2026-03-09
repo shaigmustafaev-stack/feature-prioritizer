@@ -26,7 +26,7 @@ export default function Home() {
       <div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] justify-items-center gap-4 max-sm:grid-cols-1">
         {tools.map(tool => (
           <Link key={tool.href} href={tool.href} className="w-full no-underline">
-            <Card className="flex w-full cursor-pointer items-center gap-5 border-border p-5 min-h-[180px] transition-all hover:border-primary hover:shadow-lg hover:shadow-primary/10 hover:-translate-y-1 max-sm:min-h-[140px]">
+            <Card className="group flex min-h-[180px] w-full cursor-pointer items-center gap-5 border-border p-5 transition-all hover:-translate-y-1 hover:border-primary hover:shadow-lg hover:shadow-primary/10 max-sm:min-h-[140px]">
               <div className="flex h-[72px] w-[72px] shrink-0 items-center justify-center rounded-xl bg-background text-5xl max-sm:h-14 max-sm:w-14 max-sm:text-4xl">
                 {tool.icon}
               </div>

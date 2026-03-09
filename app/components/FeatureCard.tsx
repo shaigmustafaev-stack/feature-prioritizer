@@ -43,23 +43,28 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
     return (
       <Card className="mb-2.5 border-primary">
         <CardContent className="space-y-2">
+          <label htmlFor={`edit-name-${feature.id}`} className="sr-only">Название фичи</label>
           <Input
+            id={`edit-name-${feature.id}`}
             value={editForm.name}
             autoFocus
             onChange={e => setEditForm({ ...editForm, name: e.target.value })}
             className="text-[15px] font-semibold"
             placeholder="Название фичи"
           />
+          <label htmlFor={`edit-desc-${feature.id}`} className="sr-only">Описание фичи</label>
           <Input
+            id={`edit-desc-${feature.id}`}
             value={editForm.desc}
             onChange={e => setEditForm({ ...editForm, desc: e.target.value })}
             className="text-xs"
             placeholder="Какую проблему решает?"
           />
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-2 gap-2 max-sm:grid-cols-1">
             <div>
-              <label className={`text-[11px] ${isIce ? "text-muted-foreground/35" : "text-muted-foreground"}`}>📊 Охват</label>
+              <label htmlFor={`edit-reach-${feature.id}`} className={`text-[11px] ${isIce ? "text-muted-foreground/35" : "text-muted-foreground"}`}>📊 Охват</label>
               <Input
+                id={`edit-reach-${feature.id}`}
                 type="number"
                 value={editForm.reach}
                 disabled={isIce}
@@ -69,7 +74,7 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
             <div>
               <label className="text-[11px] text-muted-foreground">💥 Влияние</label>
               <Select value={editForm.impact} onValueChange={v => v && setEditForm({ ...editForm, impact: v })}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger aria-label="Влияние" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -80,7 +85,7 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
             <div>
               <label className="text-[11px] text-muted-foreground">🎯 Уверенность</label>
               <Select value={editForm.confidence} onValueChange={v => v && setEditForm({ ...editForm, confidence: v })}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger aria-label="Уверенность" className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -89,8 +94,9 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
               </Select>
             </div>
             <div>
-              <label className="text-[11px] text-muted-foreground">⚡ Трудозатраты</label>
+              <label htmlFor={`edit-effort-${feature.id}`} className="text-[11px] text-muted-foreground">⚡ Трудозатраты</label>
               <Input
+                id={`edit-effort-${feature.id}`}
                 type="number"
                 value={editForm.effort}
                 step="0.25"
@@ -99,8 +105,8 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
             </div>
           </div>
           <div className="flex gap-2">
-            <Button onClick={onSaveEdit} className="flex-1" size="sm">Сохранить</Button>
-            <Button variant="outline" onClick={onCancelEdit} size="sm">Отмена</Button>
+            <Button type="button" onClick={onSaveEdit} className="flex-1" size="sm">Сохранить</Button>
+            <Button type="button" variant="outline" onClick={onCancelEdit} size="sm">Отмена</Button>
           </div>
         </CardContent>
       </Card>
@@ -132,13 +138,13 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
               {st.label}
             </button>
             <button type="button" onClick={onStartEdit}
-              className="flex items-center gap-1.5 border-none bg-transparent p-0 text-sm font-semibold text-foreground transition-colors hover:text-primary cursor-pointer"
+              className="group flex cursor-pointer items-center gap-1.5 border-none bg-transparent p-0 text-sm font-semibold text-foreground transition-colors hover:text-primary"
               aria-label={`Редактировать фичу "${feature.name}"`}>
               {feature.name}
               <span className="text-muted-foreground transition-colors group-hover:text-primary"><PencilIcon /></span>
             </button>
           </div>
-          <Button variant="ghost" size="icon-xs" onClick={onRemove} aria-label={`Удалить фичу "${feature.name}"`}>
+          <Button type="button" variant="ghost" size="icon-xs" onClick={onRemove} aria-label={`Удалить фичу "${feature.name}"`}>
             ✕
           </Button>
         </div>

@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 interface Props {
+  id?: string;
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
@@ -12,7 +13,7 @@ interface Props {
   error?: string;
 }
 
-export function NumberInput({ value, onChange, placeholder, step = 1, min = 0, disabled, error }: Props) {
+export function NumberInput({ id, value, onChange, placeholder, step = 1, min = 0, disabled, error }: Props) {
   const decrement = () => onChange(String(Math.max(min, (Number(value) || 0) - step)));
   const increment = () => onChange(String((Number(value) || 0) + step));
 
@@ -34,6 +35,7 @@ export function NumberInput({ value, onChange, placeholder, step = 1, min = 0, d
         −
       </Button>
       <Input
+        id={id}
         type="number"
         disabled={disabled}
         placeholder={placeholder}
