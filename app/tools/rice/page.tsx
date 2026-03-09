@@ -78,14 +78,15 @@ export default function Home() {
     }
   };
 
+  const sortedByScore = [...features].sort((a, b) => getScore(b, mode) - getScore(a, mode));
   const sorted = sortBy === "score"
-    ? [...features].sort((a, b) => getScore(b, mode) - getScore(a, mode))
+    ? sortedByScore
     : [...features].sort((a, b) => b.id - a.id);
-  const maxScore = sorted.length ? getScore(sorted[0], mode) : 1;
+  const maxScore = sortedByScore.length ? getScore(sortedByScore[0], mode) : 1;
   const filtered = filterStatus === "all" ? sorted : sorted.filter(f => f.status === filterStatus);
   const doneCount = features.filter(f => f.status === "done").length;
   const inProgressCount = features.filter(f => f.status === "in-progress").length;
-  const topScore = sorted.length > 0 ? getScore(sorted[0], mode) : 0;
+  const topScore = sortedByScore.length > 0 ? getScore(sortedByScore[0], mode) : 0;
 
   const handleExportCsv = () => {
     if (sorted.length === 0) return;
@@ -104,7 +105,7 @@ export default function Home() {
     const mock: Feature = { id: 0, name: "", desc: "", status: "new", reach: Number(form.reach) || DEFAULT_REACH, impact: Number(form.impact), confidence: Number(form.confidence), effort: Number(form.effort) };
     return getScore(mock, mode);
   })();
-  const previewRank = previewScore !== null ? sorted.filter(f => getScore(f, mode) > previewScore).length + 1 : null;
+  const previewRank = previewScore !== null ? sortedByScore.filter(f => getScore(f, mode) > previewScore).length + 1 : null;
   const previewColor = previewScore !== null ? getBarColor(previewScore, Math.max(maxScore, previewScore)) : "#64748b";
 
   return (
