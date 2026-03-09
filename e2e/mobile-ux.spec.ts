@@ -27,9 +27,9 @@ test("mobile UX: порядок полей, tap-target и работа InfoTip",
 
   const firstInfoTip = page.getByLabel("Показать подсказку").first();
   await firstInfoTip.tap();
-  await expect(page.getByText("Сколько пользователей столкнётся с этой фичей в месяц.", { exact: false })).toBeVisible();
+  await expect(page.getByText("Пользователей затронет фича в месяц.", { exact: false })).toBeVisible();
   await firstInfoTip.tap();
-  await expect(page.getByText("Сколько пользователей столкнётся с этой фичей в месяц.", { exact: false })).toBeHidden();
+  await expect(page.getByText("Пользователей затронет фича в месяц.", { exact: false })).toBeHidden();
 
   const hasHorizontalScroll = await page.evaluate(() => {
     return document.documentElement.scrollWidth > document.documentElement.clientWidth;
