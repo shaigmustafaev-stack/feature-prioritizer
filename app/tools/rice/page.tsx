@@ -169,8 +169,8 @@ export default function Home() {
       </p>
 
       {/* Form */}
-      <Card className="mb-4 overflow-visible">
-        <CardContent className="space-y-2 overflow-visible max-sm:space-y-1.5 max-sm:p-3">
+      <Card className="mb-4">
+        <CardContent className="space-y-2 max-sm:space-y-1.5 max-sm:p-3">
           <div className="grid grid-cols-[3fr_2fr] gap-2 max-sm:grid-cols-1 max-sm:gap-1.5">
             <div>
               <label htmlFor="feature-name" className="mb-1 block text-sm font-medium text-foreground">Название</label>
@@ -197,19 +197,19 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 gap-2 max-sm:gap-1.5">
-            <div data-testid="field-reach" className="max-md:order-1">
+            <div data-testid="field-reach" className="max-sm:order-1">
               <label className={`mb-1 flex items-center gap-1 text-sm font-medium max-md:text-base ${isIce ? "text-foreground/35" : "text-foreground"}`}>
                 📊 Охват
-                <InfoTip text="Сколько пользователей столкнётся с этой фичей в месяц. Чем больше охват — тем выше скор." />
+                <InfoTip text="Пользователей затронет фича в месяц. Больше = выше скор." />
               </label>
               <NumberInput id="feature-reach" value={form.reach} placeholder="1000" step={100} min={0} disabled={isIce} error={errors.reach}
                 onChange={v => { setForm({ ...form, reach: v }); setErrors({ ...errors, reach: undefined }); }} />
               {errors.reach && <div className="mt-0.5 text-[11px] text-destructive">{errors.reach}</div>}
             </div>
-            <div data-testid="field-impact" className="max-md:order-3">
+            <div data-testid="field-impact" className="max-sm:order-3">
               <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground max-md:text-base">
                 💥 Влияние
-                <InfoTip text="Насколько сильно фича изменит поведение или опыт пользователя. 3 — трансформирует продукт, 0.25 — едва заметно." />
+                <InfoTip text="Сила изменения опыта. 3 — трансформирует, 0.25 — едва заметно." />
               </label>
               <Select value={form.impact} onValueChange={v => v && setForm({ ...form, impact: v })}>
                 <SelectTrigger aria-label="Влияние" className="w-full">
@@ -220,10 +220,10 @@ export default function Home() {
                 </SelectContent>
               </Select>
             </div>
-            <div data-testid="field-confidence" className="max-md:order-4">
+            <div data-testid="field-confidence" className="max-sm:order-4">
               <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground max-md:text-base">
                 🎯 Уверенность
-                <InfoTip text="Насколько ты уверен в оценках охвата и влияния. 100% — есть данные, 10% — чистая интуиция." />
+                <InfoTip text="Уверенность в оценках. 100% — данные, 10% — интуиция." />
               </label>
               <Select value={form.confidence} onValueChange={v => v && setForm({ ...form, confidence: v })}>
                 <SelectTrigger aria-label="Уверенность" className="w-full">
@@ -234,10 +234,10 @@ export default function Home() {
                 </SelectContent>
               </Select>
             </div>
-            <div data-testid="field-effort" className="max-md:order-2">
+            <div data-testid="field-effort" className="max-sm:order-2">
               <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground max-md:text-base">
-                ⚡ Трудозатраты (чел-мес)
-                <InfoTip text="Сколько человеко-месяцев займёт реализация. 0.5 — пара недель одного разработчика, 3 — квартал команды." />
+                ⚡ Трудозатраты<span className="max-sm:hidden"> (чел-мес)</span>
+                <InfoTip text="Человеко-месяцев на реализацию. 0.5 — пара недель, 3 — квартал команды." />
               </label>
               <NumberInput id="feature-effort" value={form.effort} placeholder="2" step={0.5} min={0.25} error={errors.effort}
                 onChange={v => { setForm({ ...form, effort: v }); setErrors({ ...errors, effort: undefined }); }} />

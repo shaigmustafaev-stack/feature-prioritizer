@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useId } from "react";
+import { CircleHelp } from "lucide-react";
 
 interface Props {
   text: string;
@@ -40,11 +41,13 @@ export function InfoTip({ text }: Props) {
         aria-label="Показать подсказку"
         aria-expanded={open}
         aria-describedby={open ? tipId : undefined}
-        className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border border-border text-[11px] text-muted-foreground transition-colors hover:border-primary hover:text-primary md:h-6 md:w-6 md:text-[11px]"
-        onClick={e => {
+        className="inline-flex h-5 w-5 cursor-pointer items-center justify-center text-muted-foreground/50 transition-colors hover:text-primary active:text-primary"
+        onPointerDown={e => {
           e.preventDefault();
           setOpen(v => !v);
         }}
+        onPointerEnter={e => { if (e.pointerType === "mouse") setOpen(true); }}
+        onPointerLeave={e => { if (e.pointerType === "mouse") setOpen(false); }}
         onKeyDown={e => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
@@ -55,13 +58,13 @@ export function InfoTip({ text }: Props) {
           }
         }}
       >
-        ?
+        <CircleHelp size={14} />
       </button>
       {open && (
         <span
           id={tipId}
           role="tooltip"
-          className="absolute left-1/2 top-full z-50 mt-1 w-max max-w-[260px] -translate-x-1/2 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
+          className="absolute left-1/2 top-full z-50 mt-1 w-max max-w-[160px] -translate-x-1/2 rounded-md bg-foreground px-3 py-1.5 text-xs text-background shadow-md"
         >
           {text}
         </span>
