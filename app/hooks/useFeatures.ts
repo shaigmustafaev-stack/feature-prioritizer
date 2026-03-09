@@ -13,6 +13,14 @@ function getOrCreateUserId(): string {
   return id;
 }
 
+function isDemoSeeded(userId: string): boolean {
+  return localStorage.getItem(`producthub-demo-seeded:${userId}`) === "true";
+}
+
+function markDemoSeeded(userId: string): void {
+  localStorage.setItem(`producthub-demo-seeded:${userId}`, "true");
+}
+
 export function useFeatures() {
   const [features, setFeatures] = useState<Feature[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -30,8 +38,8 @@ export function useFeatures() {
         if (!res.ok) throw new Error("Не удалось загрузить фичи");
         const data: Feature[] = await res.json();
 
-        if (data.length === 0) {
-          // Новый пользователь — сеем 3 демо-фичи
+        if (data.length === 0 && !isDemoSeeded(id)) {
+          // Новый пользователь — сеем 3 демо-фичи однократно
           const seeded = await Promise.all(
             DEMO_FEATURES.map(f =>
               fetch("/api/features", {
@@ -50,6 +58,7 @@ export function useFeatures() {
               }).then(r => r.json() as Promise<Feature>)
             )
           );
+          markDemoSeeded(id);
           setFeatures(seeded);
         } else {
           setFeatures(data);
