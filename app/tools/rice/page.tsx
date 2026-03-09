@@ -31,11 +31,11 @@ export default function Home() {
 
   const isIce = mode === "ICE";
 
-  const handleAddFeature = () => {
+  const handleAddFeature = async () => {
     const { valid, errors: e } = validateFeature(form, mode);
     setErrors(e);
     if (!valid) return;
-    addFeature({
+    await addFeature({
       name: form.name.trim(),
       desc: form.desc.trim(),
       reach: Number(form.reach) || DEFAULT_REACH,
@@ -54,10 +54,10 @@ export default function Home() {
     setEditForm({ name: f.name, desc: f.desc || "", reach: String(f.reach), impact: String(f.impact), confidence: String(f.confidence), effort: String(f.effort) });
   };
 
-  const saveEdit = () => {
+  const saveEdit = async () => {
     const { valid } = validateFeature(editForm, mode);
     if (!valid || editId === null) return;
-    updateFeature(editId, {
+    await updateFeature(editId, {
       name: editForm.name.trim(),
       desc: editForm.desc.trim(),
       reach: Number(editForm.reach),
