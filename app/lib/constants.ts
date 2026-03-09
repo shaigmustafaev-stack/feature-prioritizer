@@ -1,7 +1,6 @@
 import type { Feature, FormState, Status } from "./types";
 
 export const DEFAULT_REACH = 100;
-export const STORAGE_KEY = "rice-features";
 export const STATUS_CYCLE: Status[] = ["new", "in-progress", "done", "deferred"];
 
 export const IMPACT_SCALE = [
