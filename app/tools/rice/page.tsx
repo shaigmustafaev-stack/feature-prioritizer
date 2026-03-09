@@ -17,7 +17,7 @@ import { InfoTip } from "../../components/InfoTip";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 export default function Home() {
-  const { features, loaded, addFeature, removeFeature, updateFeature, updateStatus, clearAll } = useFeatures();
+  const { features, loaded, error, mutating, addFeature, removeFeature, updateFeature, updateStatus, clearAll } = useFeatures();
 
   const [mode, setMode] = useState<ScoringMode>("RICE");
   const [form, setForm] = useState<FormState>({ ...EMPTY_FORM });
@@ -197,7 +197,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-2 gap-2 max-sm:gap-1.5">
-            <div>
+            <div data-testid="field-reach" className="max-sm:order-1">
               <label className={`mb-1 flex items-center gap-1 text-sm font-medium max-md:text-base ${isIce ? "text-foreground/35" : "text-foreground"}`}>
                 📊 Охват
                 <InfoTip text="Сколько пользователей столкнётся с этой фичей в месяц. Чем больше охват — тем выше скор." />
@@ -206,7 +206,7 @@ export default function Home() {
                 onChange={v => { setForm({ ...form, reach: v }); setErrors({ ...errors, reach: undefined }); }} />
               {errors.reach && <div className="mt-0.5 text-[11px] text-destructive">{errors.reach}</div>}
             </div>
-            <div>
+            <div data-testid="field-impact" className="max-sm:order-3">
               <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground max-md:text-base">
                 💥 Влияние
                 <InfoTip text="Насколько сильно фича изменит поведение или опыт пользователя. 3 — трансформирует продукт, 0.25 — едва заметно." />
@@ -220,7 +220,7 @@ export default function Home() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div data-testid="field-confidence" className="max-sm:order-4">
               <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground max-md:text-base">
                 🎯 Уверенность
                 <InfoTip text="Насколько ты уверен в оценках охвата и влияния. 100% — есть данные, 10% — чистая интуиция." />
@@ -234,7 +234,7 @@ export default function Home() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
+            <div data-testid="field-effort" className="max-sm:order-2">
               <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground max-md:text-base">
                 ⚡ Трудозатраты (чел-мес)
                 <InfoTip text="Сколько человеко-месяцев займёт реализация. 0.5 — пара недель одного разработчика, 3 — квартал команды." />
@@ -265,12 +265,19 @@ export default function Home() {
           <Button
             type="button"
             onClick={handleAddFeature}
-            className={`w-full ${justAdded ? "bg-green-500 hover:bg-green-500" : ""}`}
+            disabled={mutating}
+            className={`h-11 w-full text-base font-semibold max-sm:h-12 ${justAdded ? "bg-green-500 hover:bg-green-500" : ""}`}
           >
-            {justAdded ? "✓ Добавлено!" : "Добавить в бэклог"}
+            {mutating ? "Добавляется..." : justAdded ? "✓ Добавлено!" : "Добавить в бэклог"}
           </Button>
         </CardContent>
       </Card>
+
+      {error && (
+        <div className="mb-3 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
 
       {/* Backlog */}
       <div>
