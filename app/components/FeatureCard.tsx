@@ -3,6 +3,7 @@
 import { STATUSES } from "../lib/types";
 import type { Feature, Status, FormState, ScoringMode } from "../lib/types";
 import { IMPACT_SCALE, CONF_OPTIONS, STATUS_CYCLE } from "../lib/constants";
+import { getImpactLabel, getConfLabel } from "../lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -75,7 +76,7 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
               <label className="text-[11px] text-muted-foreground">💥 Влияние</label>
               <Select value={editForm.impact} onValueChange={v => v && setEditForm({ ...editForm, impact: v })}>
                 <SelectTrigger aria-label="Влияние" className="w-full">
-                  <SelectValue />
+                  <SelectValue placeholder="Выбрать">{getImpactLabel(editForm.impact)}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {IMPACT_SCALE.map(o => <SelectItem key={o.val} value={String(o.val)}>{o.label}</SelectItem>)}
@@ -86,7 +87,7 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
               <label className="text-[11px] text-muted-foreground">🎯 Уверенность</label>
               <Select value={editForm.confidence} onValueChange={v => v && setEditForm({ ...editForm, confidence: v })}>
                 <SelectTrigger aria-label="Уверенность" className="w-full">
-                  <SelectValue />
+                  <SelectValue placeholder="Выбрать">{getConfLabel(editForm.confidence)}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {CONF_OPTIONS.map(o => <SelectItem key={o.val} value={String(o.val)}>{o.label}</SelectItem>)}
@@ -121,7 +122,7 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
   const isDimmed = feature.status === "done" || feature.status === "deferred";
 
   return (
-    <Card className={`mb-2.5 ${isDimmed ? "opacity-60" : ""}`}>
+    <Card className={`mb-2.5 transition-colors hover:bg-muted/50 ${isDimmed ? "opacity-60" : ""}`}>
       <CardContent>
         <div className="mb-1.5 flex items-start justify-between">
           <div className="flex flex-wrap items-center gap-2">
@@ -138,13 +139,13 @@ export function FeatureCard({ feature, index, score, maxScore, isEditing, isIce,
               {st.label}
             </button>
             <button type="button" onClick={onStartEdit}
-              className="group flex cursor-pointer items-center gap-1.5 border-none bg-transparent p-0 text-sm font-semibold text-foreground transition-colors hover:text-primary"
+              className="group flex min-w-0 cursor-pointer items-center gap-1.5 border-none bg-transparent p-0 text-left text-sm font-semibold text-foreground transition-colors hover:text-primary"
               aria-label={`Редактировать фичу "${feature.name}"`}>
-              {feature.name}
+              <span className="truncate">{feature.name}</span>
               <span className="text-muted-foreground transition-colors group-hover:text-primary"><PencilIcon /></span>
             </button>
           </div>
-          <Button type="button" variant="ghost" size="icon-xs" onClick={onRemove} aria-label={`Удалить фичу "${feature.name}"`}>
+          <Button type="button" variant="ghost" size="icon" onClick={onRemove} aria-label={`Удалить фичу "${feature.name}"`}>
             ✕
           </Button>
         </div>

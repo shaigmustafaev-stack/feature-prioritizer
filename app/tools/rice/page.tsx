@@ -7,13 +7,13 @@ import { NumberInput } from "../../components/NumberInput";
 import { STATUSES } from "../../lib/types";
 import type { Status, ScoringMode, FormState, FormErrors, Feature } from "../../lib/types";
 import { IMPACT_SCALE, CONF_OPTIONS, STATUS_CYCLE, EMPTY_FORM, DEFAULT_REACH } from "../../lib/constants";
-import { getScore, getBarColor, validateFeature, buildCsv } from "../../lib/utils";
+import { getScore, getBarColor, validateFeature, buildCsv, getImpactLabel, getConfLabel } from "../../lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
+import { InfoTip } from "../../components/InfoTip";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 export default function Home() {
@@ -132,13 +132,9 @@ export default function Home() {
           </TabsList>
         </Tabs>
       </div>
-      <p className="mb-4 text-xs text-muted-foreground">
-        {mode === "RICE"
-          ? "RICE = (Охват × Влияние × Уверенность%) ÷ Трудозатраты"
-          : "ICE = Влияние × Уверенность% × (10 ÷ Трудозатраты)"}
-      </p>
 
-      <div className="mb-4 grid grid-cols-4 gap-2 max-sm:grid-cols-2">
+      {/* KPI — десктоп: карточки, мобиль: компактная строка */}
+      <div className="mb-4 grid grid-cols-4 gap-2 max-sm:hidden">
         <Card>
           <CardContent className="px-3 py-2">
             <p className="text-[11px] text-muted-foreground">Всего фич</p>
@@ -164,13 +160,16 @@ export default function Home() {
           </CardContent>
         </Card>
       </div>
+      <p className="mb-3 hidden text-xs text-muted-foreground max-sm:block">
+        Фич: {features.length} · В работе: {inProgressCount} · Готово: {doneCount} · Топ: {topScore}
+      </p>
 
       {/* Form */}
       <Card className="mb-4">
-        <CardContent className="space-y-2">
-          <div className="grid grid-cols-[3fr_2fr] gap-2 max-sm:grid-cols-1">
+        <CardContent className="space-y-2 max-sm:space-y-1.5 max-sm:p-3">
+          <div className="grid grid-cols-[3fr_2fr] gap-2 max-sm:grid-cols-1 max-sm:gap-1.5">
             <div>
-              <label htmlFor="feature-name" className="mb-1 block text-xs text-muted-foreground">Название *</label>
+              <label htmlFor="feature-name" className="mb-1 block text-sm font-medium text-foreground">Название</label>
               <Input
                 id="feature-name"
                 placeholder="Например: Онбординг новых пользователей"
@@ -181,7 +180,7 @@ export default function Home() {
               {errors.name && <div className="mt-0.5 text-[11px] text-destructive">{errors.name}</div>}
             </div>
             <div>
-              <label htmlFor="feature-desc" className="mb-1 block text-xs text-muted-foreground">Какую проблему решает? (необязательно)</label>
+              <label htmlFor="feature-desc" className="mb-1 block text-sm font-medium text-foreground">Описание <span className="font-normal text-muted-foreground">(необязательно)</span></label>
               <Input
                 id="feature-desc"
                 placeholder="Например: пользователи уходят на втором шаге"
@@ -191,30 +190,24 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 max-sm:grid-cols-1">
+          <div className="grid grid-cols-2 gap-2 max-sm:gap-1.5">
             <div>
-              <label className={`mb-1 flex items-center gap-1 text-xs ${isIce ? "text-muted-foreground/35" : "text-muted-foreground"}`}>
-                📊 Охват (пользователей/мес) {!isIce && "*"}
-                <Tooltip>
-                  <TooltipTrigger className="cursor-help text-[10px] text-muted-foreground">?</TooltipTrigger>
-                  <TooltipContent>Сколько пользователей столкнётся с этой фичей в месяц. Чем больше охват — тем выше скор.</TooltipContent>
-                </Tooltip>
+              <label className={`mb-1 flex items-center gap-1 text-sm font-medium ${isIce ? "text-foreground/35" : "text-foreground"}`}>
+                📊 Охват
+                <InfoTip text="Сколько пользователей столкнётся с этой фичей в месяц. Чем больше охват — тем выше скор." />
               </label>
               <NumberInput id="feature-reach" value={form.reach} placeholder="1000" step={100} min={0} disabled={isIce} error={errors.reach}
                 onChange={v => { setForm({ ...form, reach: v }); setErrors({ ...errors, reach: undefined }); }} />
               {errors.reach && <div className="mt-0.5 text-[11px] text-destructive">{errors.reach}</div>}
             </div>
             <div>
-              <label className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
+              <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground">
                 💥 Влияние
-                <Tooltip>
-                  <TooltipTrigger className="cursor-help text-[10px] text-muted-foreground">?</TooltipTrigger>
-                  <TooltipContent>Насколько сильно фича изменит поведение или опыт пользователя. 3 — трансформирует продукт, 0.25 — едва заметно.</TooltipContent>
-                </Tooltip>
+                <InfoTip text="Насколько сильно фича изменит поведение или опыт пользователя. 3 — трансформирует продукт, 0.25 — едва заметно." />
               </label>
               <Select value={form.impact} onValueChange={v => v && setForm({ ...form, impact: v })}>
                 <SelectTrigger aria-label="Влияние" className="w-full">
-                  <SelectValue />
+                  <SelectValue placeholder="Выбрать">{getImpactLabel(form.impact)}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {IMPACT_SCALE.map(o => <SelectItem key={o.val} value={String(o.val)}>{o.label}</SelectItem>)}
@@ -222,16 +215,13 @@ export default function Home() {
               </Select>
             </div>
             <div>
-              <label className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
+              <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground">
                 🎯 Уверенность
-                <Tooltip>
-                  <TooltipTrigger className="cursor-help text-[10px] text-muted-foreground">?</TooltipTrigger>
-                  <TooltipContent>Насколько ты уверен в оценках охвата и влияния. 100% — есть данные, 10% — чистая интуиция.</TooltipContent>
-                </Tooltip>
+                <InfoTip text="Насколько ты уверен в оценках охвата и влияния. 100% — есть данные, 10% — чистая интуиция." />
               </label>
               <Select value={form.confidence} onValueChange={v => v && setForm({ ...form, confidence: v })}>
                 <SelectTrigger aria-label="Уверенность" className="w-full">
-                  <SelectValue />
+                  <SelectValue placeholder="Выбрать">{getConfLabel(form.confidence)}</SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {CONF_OPTIONS.map(o => <SelectItem key={o.val} value={String(o.val)}>{o.label}</SelectItem>)}
@@ -239,12 +229,9 @@ export default function Home() {
               </Select>
             </div>
             <div>
-              <label className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
-                ⚡ Трудозатраты (чел-мес) *
-                <Tooltip>
-                  <TooltipTrigger className="cursor-help text-[10px] text-muted-foreground">?</TooltipTrigger>
-                  <TooltipContent>Сколько человеко-месяцев займёт реализация. 0.5 — пара недель одного разработчика, 3 — квартал команды.</TooltipContent>
-                </Tooltip>
+              <label className="mb-1 flex items-center gap-1 text-sm font-medium text-foreground">
+                ⚡ Трудозатраты (чел-мес)
+                <InfoTip text="Сколько человеко-месяцев займёт реализация. 0.5 — пара недель одного разработчика, 3 — квартал команды." />
               </label>
               <NumberInput id="feature-effort" value={form.effort} placeholder="2" step={0.5} min={0.25} error={errors.effort}
                 onChange={v => { setForm({ ...form, effort: v }); setErrors({ ...errors, effort: undefined }); }} />
@@ -308,7 +295,7 @@ export default function Home() {
               const sc = st === "all" ? null : STATUSES[st];
               return (
                 <button type="button" key={st} onClick={() => setFilterStatus(st)}
-                  className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-all hover:border-primary/50"
+                  className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-all hover:border-primary/50 hover:bg-muted"
                   style={{
                     borderColor: active ? (sc?.color ?? "#6366f1") : undefined,
                     background: active ? (sc ? sc.bg : "#6366f118") : undefined,

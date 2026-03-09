@@ -111,3 +111,25 @@ input[type=number] {
 input:focus::placeholder {
   color: transparent;
 }
+
+/* Глобальные курсоры и переходы для интерактивных элементов */
+button,
+[role="combobox"],
+[role="option"],
+[role="tab"],
+[data-slot="select-trigger"],
+summary {
+  cursor: pointer;
+}
+
+button,
+[role="tab"],
+[data-slot="select-trigger"] {
+  transition: transform 100ms ease;
+}
+
+button:active:not(:disabled),
+[role="tab"]:active,
+[data-slot="select-trigger"]:active {
+  transform: scale(0.97);
+}
