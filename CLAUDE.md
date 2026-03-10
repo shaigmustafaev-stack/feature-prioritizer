@@ -64,8 +64,6 @@ app/
     types.ts                # все TypeScript-типы: Feature, Status, ScoringMode, FormState и др.
     constants.ts            # константы: IMPACT_SCALE, CONF_OPTIONS, STATUS_CYCLE, DEMO_FEATURES и др.
     utils.ts                # чистые функции: calcRice, calcIce, getScore, validateFeature, buildCsv
-
-  lib/
     supabase-browser.ts     # Supabase клиент для браузера (createBrowserClient)
     supabase-server.ts      # Supabase клиент для сервера (createServerClient + cookies)
 

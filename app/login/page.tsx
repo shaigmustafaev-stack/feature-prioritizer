@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { supabaseBrowser } from "../lib/supabase-browser";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +14,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get("from") ?? "/";
+  const supabase = useRef(supabaseBrowser()).current;
 
   const [tab, setTab] = useState<Tab>("login");
   const [email, setEmail] = useState("");
@@ -21,8 +22,6 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  const supabase = supabaseBrowser();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,31 +81,39 @@ function LoginForm() {
           </Tabs>
 
           {info && (
-            <p className="mb-4 rounded-md bg-green-500/10 px-3 py-2 text-sm text-green-400">
+            <p role="status" className="mb-4 rounded-md bg-primary/10 px-3 py-2 text-sm text-primary">
               {info}
             </p>
           )}
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-            <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
-            <Input
-              type="password"
-              placeholder="Пароль"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              autoComplete={tab === "login" ? "current-password" : "new-password"}
-            />
+            <div className="flex flex-col gap-1">
+              <label htmlFor="login-email" className="text-sm text-muted-foreground">Email</label>
+              <Input
+                id="login-email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label htmlFor="login-password" className="text-sm text-muted-foreground">Пароль</label>
+              <Input
+                id="login-password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                autoComplete={tab === "login" ? "current-password" : "new-password"}
+              />
+            </div>
 
             {error && (
-              <p className="text-sm text-destructive">{error}</p>
+              <p role="alert" className="text-sm text-destructive">{error}</p>
             )}
 
             <Button type="submit" disabled={loading} className="mt-1">
@@ -134,9 +141,25 @@ function LoginForm() {
   );
 }
 
+function LoginSkeleton() {
+  return (
+    <div className="flex min-h-[calc(100vh-56px)] items-center justify-center px-4">
+      <div className="w-full max-w-sm rounded-xl border border-border bg-card p-6">
+        <div className="mb-6 h-7 w-40 mx-auto rounded bg-muted/30 animate-pulse" />
+        <div className="mb-6 h-10 w-full rounded bg-muted/30 animate-pulse" />
+        <div className="flex flex-col gap-3">
+          <div className="h-10 w-full rounded bg-muted/30 animate-pulse" />
+          <div className="h-10 w-full rounded bg-muted/30 animate-pulse" />
+          <div className="h-10 w-full rounded bg-muted/30 animate-pulse" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function LoginPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<LoginSkeleton />}>
       <LoginForm />
     </Suspense>
   );
