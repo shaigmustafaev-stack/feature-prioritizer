@@ -10,7 +10,10 @@ const ANON_KEY = "producthub-anon-features";
 const ANON_SEEDED_KEY = "producthub-demo-seeded:anon";
 const MIGRATED_KEY = "producthub-migrated";
 
-let anonNextId = Date.now();
+// Date.now() + рандом предотвращает коллизии ID при работе в нескольких вкладках
+function generateAnonId(): number {
+  return Date.now() + Math.floor(Math.random() * 1_000_000);
+}
 
 function loadAnon(): Feature[] {
   try {
@@ -34,6 +37,19 @@ function seedAnon(): Feature[] {
 
 // Минимальный тип пользователя — чтобы не импортировать весь @supabase/supabase-js
 type AuthUser = { id: string; email?: string | null };
+
+// Сериализация Feature → тело API запроса (POST и миграция)
+function featureToApiBody(f: Omit<Feature, "id">) {
+  return {
+    name: f.name,
+    description: f.desc,
+    reach: f.reach,
+    impact: f.impact,
+    confidence: f.confidence,
+    effort: f.effort,
+    status: f.status,
+  };
+}
 
 // ─── Основной хук ─────────────────────────────────────────────────────────────
 
@@ -74,15 +90,7 @@ export function useFeatures(user: AuthUser | null) {
                 fetch("/api/features", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    name: f.name,
-                    description: f.desc,
-                    reach: f.reach,
-                    impact: f.impact,
-                    confidence: f.confidence,
-                    effort: f.effort,
-                    status: f.status,
-                  }),
+                  body: JSON.stringify(featureToApiBody(f)),
                 })
               )
             );
@@ -109,7 +117,7 @@ export function useFeatures(user: AuthUser | null) {
   // ── Добавить ──────────────────────────────────────────────────────────────
   const addFeature = useCallback(async (feature: Omit<Feature, "id" | "status">): Promise<void> => {
     if (user === null) {
-      const newFeature: Feature = { ...feature, id: ++anonNextId, status: "new" };
+      const newFeature: Feature = { ...feature, id: generateAnonId(), status: "new" };
       setFeatures(prev => {
         const updated = [...prev, newFeature];
         saveAnon(updated);
@@ -123,15 +131,7 @@ export function useFeatures(user: AuthUser | null) {
       const res = await fetch("/api/features", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: feature.name,
-          description: feature.desc,
-          reach: feature.reach,
-          impact: feature.impact,
-          confidence: feature.confidence,
-          effort: feature.effort,
-          status: "new",
-        }),
+        body: JSON.stringify(featureToApiBody({ ...feature, status: "new" })),
       });
       if (!res.ok) throw new Error("Не удалось добавить фичу");
       const data: Feature = await res.json();
