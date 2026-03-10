@@ -65,13 +65,25 @@ app/
     constants.ts            # константы: IMPACT_SCALE, CONF_OPTIONS, STATUS_CYCLE, DEMO_FEATURES и др.
     utils.ts                # чистые функции: calcRice, calcIce, getScore, validateFeature, buildCsv
 
+  lib/
+    supabase-browser.ts     # Supabase клиент для браузера (createBrowserClient)
+    supabase-server.ts      # Supabase клиент для сервера (createServerClient + cookies)
+
   hooks/
-    useFeatures.ts          # управление бэклогом (useState + localStorage)
+    useAuth.ts              # хук авторизации: user, loading, logout()
+    useFeatures.ts          # управление бэклогом: local (анонимный) / cloud (авторизованный) режим
 
   components/
-    Navbar.tsx              # навигационная панель (Client Component, usePathname)
+    Navbar.tsx              # навигационная панель: Войти/email+Выйти, loading skeleton
     FeatureCard.tsx         # карточка фичи: просмотр + встроенное редактирование
     NumberInput.tsx         # числовой инпут с кнопками +/− (shadcn Button + Input)
+
+  auth/
+    callback/
+      route.ts              # OAuth callback — обмен code на сессию (GET /auth/callback)
+
+  login/
+    page.tsx                # страница входа/регистрации (tabs: Войти / Зарегистрироваться)
 
   __tests__/
     utils.test.ts           # unit-тесты для lib/utils.ts
@@ -110,8 +122,24 @@ lib/
 - **Адаптив:** брейкпоинт `max-sm` (640px), без горизонтального скролла; при сжатии приоритет действий и читаемость метрик сохраняются.
 - **Перед merge:** проверить визуальную консистентность, keyboard-навигацию и отсутствие регрессий в ключевом сценарии приоритизатора.
 
+## Авторизация (Supabase Auth)
+- **Пакет:** `@supabase/ssr` — обязателен для SSR. Два клиента: `supabase-browser.ts` (браузер) и `supabase-server.ts` (сервер + cookies).
+- **proxy.ts** (корень проекта) — Next.js 16: файл называется `proxy.ts`, функция `proxy`. Обновляет JWT при каждом запросе.
+- **Анонимный режим:** user === null → данные только в localStorage (ключи: `producthub-anon-features`, `producthub-demo-seeded:anon`). Supabase не используется.
+- **Авторизованный режим:** данные в Supabase через `/api/features`. user_id берётся из `supabase.auth.getUser()`, не из body запроса.
+- **Миграция:** при первом входе анонимные данные переносятся в Supabase, затем localStorage чистится. Флаг: `producthub-migrated`.
+- **RLS (выполнить вручную в Supabase SQL Editor):**
+  ```sql
+  ALTER TABLE features ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "Users manage own features" ON features FOR ALL
+  USING (auth.uid()::text = user_id) WITH CHECK (auth.uid()::text = user_id);
+  ```
+- **Email confirmation:** отключить в Supabase Dashboard → Authentication → Email → "Confirm email" → off.
+- **Google OAuth:** Supabase → Auth → Providers → Google → вставить Client ID + Secret. Redirect URI: `https://<project>.supabase.co/auth/v1/callback`.
+- **Тесты:** при мокировании useAuth возвращать стабильный объект user (определить константу в фабрике vi.mock), иначе useFeatures([user]) зациклится.
+
 ## Важные детали
-- **Хранилище:** бэклог хранится в Supabase (таблица `features`). `user_id` генерируется в localStorage (`producthub-user-id`) и передаётся в API. Флаг `producthub-demo-seeded:<userId>` предотвращает повторное создание демо-фич.
+- **Хранилище:** бэклог в Supabase (таблица `features`), user_id = `auth.uid()`. Анонимный режим — только localStorage.
 - **Статусы фич:** `new → in-progress → done → deferred` (цикличное переключение по клику на бейдж). Объект `STATUSES` в `types.ts` хранит label, color, bg для каждого статуса
 - **Мобильный брейкпоинт:** `max-sm:` (640px) — при адаптивной вёрстке использовать именно его
 - **suppressHydrationWarning** на `<html>` в layout.tsx — нужно из-за браузерных расширений (Bybit Wallet и др.), которые инжектят атрибуты в DOM
