@@ -7,6 +7,24 @@ import "@testing-library/jest-dom/vitest";
 import RicePage from "../tools/rice/page";
 import type { Feature } from "../lib/types";
 
+// Мокаем useAuth — стабильный объект user, иначе useFeatures([user]) зависимость зациклит рендер
+vi.mock("../hooks/useAuth", () => {
+  const mockUser = { id: "test-user-id", email: "test@test.com" };
+  return {
+    useAuth: () => ({ user: mockUser, loading: false, logout: vi.fn() }),
+  };
+});
+
+// Мокаем supabase-browser чтобы не требовались env переменные
+vi.mock("../lib/supabase-browser", () => ({
+  supabaseBrowser: () => ({
+    auth: {
+      getUser: async () => ({ data: { user: null } }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: vi.fn() } } }),
+    },
+  }),
+}));
+
 const MOCK_FEATURES: Feature[] = [
   { id: 1, name: "Онбординг новых пользователей", desc: "Пошаговый гайд для новичков", reach: 1000, impact: 3, confidence: 80, effort: 2, status: "in-progress" },
   { id: 2, name: "Тёмная тема", desc: "Переключение светлая/тёмная", reach: 500, impact: 0.5, confidence: 90, effort: 0.5, status: "new" },
@@ -50,7 +68,8 @@ describe("RicePage integration", () => {
     originalFetch = global.fetch;
     global.fetch = vi.fn(makeFetchMock());
     localStorage.clear();
-    localStorage.setItem("producthub-user-id", "test-user");
+    // Помечаем как уже мигрированного — чтобы не запускать миграцию в тестах
+    localStorage.setItem("producthub-migrated", "true");
   });
 
   afterEach(() => {
