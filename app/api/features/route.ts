@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "../../lib/supabase";
+import { supabaseServer } from "../../lib/supabase-server";
 import type { Feature } from "../../lib/types";
 
 type SupabaseRow = {
@@ -28,16 +28,20 @@ function toFeature(row: SupabaseRow): Feature {
   };
 }
 
-export async function GET(request: NextRequest) {
-  const userId = request.nextUrl.searchParams.get("user_id");
-  if (!userId) {
-    return NextResponse.json({ error: "user_id обязателен" }, { status: 400 });
-  }
+async function getAuthUser(supabase: Awaited<ReturnType<typeof supabaseServer>>) {
+  const { data: { user } } = await supabase.auth.getUser();
+  return user;
+}
+
+export async function GET() {
+  const supabase = await supabaseServer();
+  const user = await getAuthUser(supabase);
+  if (!user) return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
 
   const { data, error } = await supabase
     .from("features")
     .select("*")
-    .eq("user_id", userId)
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -45,12 +49,16 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const supabase = await supabaseServer();
+  const user = await getAuthUser(supabase);
+  if (!user) return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+
   const body = await request.json();
 
   const { data, error } = await supabase
     .from("features")
     .insert({
-      user_id: body.user_id,
+      user_id: user.id,
       name: body.name,
       description: body.description ?? "",
       reach: body.reach,
@@ -67,8 +75,12 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  const supabase = await supabaseServer();
+  const user = await getAuthUser(supabase);
+  if (!user) return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+
   const body = await request.json();
-  const { id, user_id, ...fields } = body;
+  const { id, ...fields } = body;
 
   const updateData: Record<string, string | number> = {};
   if (fields.name !== undefined) updateData.name = fields.name;
@@ -83,7 +95,7 @@ export async function PUT(request: NextRequest) {
     .from("features")
     .update(updateData)
     .eq("id", id)
-    .eq("user_id", user_id)
+    .eq("user_id", user.id)
     .select()
     .single();
 
@@ -92,14 +104,18 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const supabase = await supabaseServer();
+  const user = await getAuthUser(supabase);
+  if (!user) return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+
   const body = await request.json();
-  const { id, user_id, clearAll } = body;
+  const { id, clearAll } = body;
 
   if (clearAll) {
     const { error } = await supabase
       .from("features")
       .delete()
-      .eq("user_id", user_id);
+      .eq("user_id", user.id);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
   }
@@ -108,7 +124,7 @@ export async function DELETE(request: NextRequest) {
     .from("features")
     .delete()
     .eq("id", id)
-    .eq("user_id", user_id);
+    .eq("user_id", user.id);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
