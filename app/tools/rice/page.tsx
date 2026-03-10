@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "../../hooks/useAuth";
 import { useFeatures } from "../../hooks/useFeatures";
 import { FeatureCard } from "../../components/FeatureCard";
 import { NumberInput } from "../../components/NumberInput";
@@ -17,7 +18,8 @@ import { InfoTip } from "../../components/InfoTip";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 export default function Home() {
-  const { features, loaded, error, mutating, addFeature, removeFeature, updateFeature, updateStatus, clearAll } = useFeatures();
+  const { user } = useAuth();
+  const { features, loaded, error, mutating, addFeature, removeFeature, updateFeature, updateStatus, clearAll } = useFeatures(user);
 
   const [mode, setMode] = useState<ScoringMode>("RICE");
   const [form, setForm] = useState<FormState>({ ...EMPTY_FORM });

@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "../hooks/useAuth";
 
 export function Navbar() {
   const pathname = usePathname();
   const isToolPage = pathname.startsWith("/tools/");
+  const { user, loading, logout } = useAuth();
 
   return (
     <nav className="sticky top-0 z-50 flex h-14 items-center border-b border-border bg-background">
@@ -20,7 +22,32 @@ export function Navbar() {
             ProductHub
           </Link>
         </div>
-        <div className="flex items-center" />
+
+        <div className="flex items-center gap-2">
+          {/* Плейсхолдер во время загрузки — предотвращает flash */}
+          {loading ? (
+            <div className="h-8 w-16 rounded-md bg-muted/30 animate-pulse" />
+          ) : user ? (
+            <>
+              <span className="max-w-[160px] truncate text-sm text-muted-foreground max-sm:hidden">
+                {user.email}
+              </span>
+              <button
+                onClick={logout}
+                className="inline-flex h-8 items-center rounded-md border border-border px-3 text-sm text-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+              >
+                Выйти
+              </button>
+            </>
+          ) : (
+            <Link
+              href={`/login?from=${encodeURIComponent(pathname)}`}
+              className="inline-flex h-8 items-center rounded-md bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Войти
+            </Link>
+          )}
+        </div>
       </div>
     </nav>
   );
