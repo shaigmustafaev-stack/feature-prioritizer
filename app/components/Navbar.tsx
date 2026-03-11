@@ -15,7 +15,7 @@ export function Navbar() {
       <div className="mx-auto flex w-full max-w-[860px] items-center justify-between px-5 max-sm:px-4">
         <div className="flex items-center gap-3">
           {isToolPage && (
-            <Button variant="outline" size="sm" render={<Link href="/" />}>
+            <Button variant="outline" size="sm" nativeButton={false} render={<Link href="/" />}>
               ← Назад
             </Button>
           )}
@@ -38,7 +38,7 @@ export function Navbar() {
               </Button>
             </>
           ) : (
-            <Button size="sm" render={<Link href={`/login?from=${encodeURIComponent(pathname)}`} />}>
+            <Button size="sm" nativeButton={false} render={<Link href={`/login?from=${encodeURIComponent(pathname)}`} />}>
               Войти
             </Button>
           )}
