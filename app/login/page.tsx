@@ -57,12 +57,17 @@ function LoginForm() {
 
   const handleGoogle = async () => {
     setError(null);
-    await supabase.auth.signInWithOAuth({
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(from)}`,
       },
     });
+    if (error) {
+      setError("Google-вход сейчас недоступен. Попробуйте email.");
+      setLoading(false);
+    }
   };
 
   return (
@@ -108,8 +113,12 @@ function LoginForm() {
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
+                minLength={tab === "signup" ? 6 : undefined}
                 autoComplete={tab === "login" ? "current-password" : "new-password"}
               />
+              {tab === "signup" && (
+                <span className="text-xs text-muted-foreground">Минимум 6 символов</span>
+              )}
             </div>
 
             {error && (
@@ -132,6 +141,7 @@ function LoginForm() {
             variant="outline"
             className="w-full"
             onClick={handleGoogle}
+            disabled={loading}
           >
             Продолжить с Google
           </Button>
