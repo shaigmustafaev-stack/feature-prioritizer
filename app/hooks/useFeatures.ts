@@ -8,7 +8,7 @@ import { DEMO_FEATURES } from "../lib/constants";
 // ─── localStorage ключи для анонимного режима ─────────────────────────────────
 const ANON_KEY = "producthub-anon-features";
 const ANON_SEEDED_KEY = "producthub-demo-seeded:anon";
-const MIGRATED_KEY = "producthub-migrated";
+const MIGRATED_PREFIX = "producthub-migrated:"; // scoped по user.id
 
 // Date.now() + рандом предотвращает коллизии ID при работе в нескольких вкладках
 function generateAnonId(): number {
@@ -53,7 +53,7 @@ function featureToApiBody(f: Omit<Feature, "id">) {
 
 // ─── Основной хук ─────────────────────────────────────────────────────────────
 
-export function useFeatures(user: AuthUser | null) {
+export function useFeatures(user: AuthUser | null, authLoading: boolean = false) {
   const [features, setFeatures] = useState<Feature[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,6 +62,10 @@ export function useFeatures(user: AuthUser | null) {
 
   // ── Загрузка ──────────────────────────────────────────────────────────────
   useEffect(() => {
+    // Пока auth загружается — не делаем ничего, чтобы не запустить anon-flow
+    // для пользователя, который на самом деле авторизован
+    if (authLoading) return;
+
     setLoaded(false);
     setFeatures([]);
 
@@ -80,24 +84,36 @@ export function useFeatures(user: AuthUser | null) {
     // Авторизованный режим — данные из Supabase
     const load = async () => {
       try {
-        // Миграция анонимных данных (однократно на устройство)
-        if (!migratedRef.current && !localStorage.getItem(MIGRATED_KEY)) {
+        // Миграция анонимных данных (однократно per user per device)
+        const migratedKey = MIGRATED_PREFIX + user.id;
+        if (!migratedRef.current && !localStorage.getItem(migratedKey)) {
           migratedRef.current = true;
           const anonFeatures = loadAnon();
           if (anonFeatures.length > 0) {
-            await Promise.all(
+            const results = await Promise.allSettled(
               anonFeatures.map(f =>
                 fetch("/api/features", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify(featureToApiBody(f)),
+                }).then(res => {
+                  if (!res.ok) throw new Error("POST failed");
                 })
               )
             );
-            localStorage.removeItem(ANON_KEY);
-            localStorage.removeItem(ANON_SEEDED_KEY);
+
+            const failedCount = results.filter(r => r.status === "rejected").length;
+            if (failedCount === 0) {
+              // Все успешно — чистим localStorage
+              localStorage.removeItem(ANON_KEY);
+              localStorage.removeItem(ANON_SEEDED_KEY);
+            } else {
+              // Частичный провал — оставляем только непроcинкнутые
+              const remaining = anonFeatures.filter((_, i) => results[i].status === "rejected");
+              saveAnon(remaining);
+            }
           }
-          localStorage.setItem(MIGRATED_KEY, "true");
+          localStorage.setItem(migratedKey, "true");
         }
 
         const res = await fetch("/api/features");
@@ -112,10 +128,10 @@ export function useFeatures(user: AuthUser | null) {
     };
 
     load();
-  }, [user]);
+  }, [user, authLoading]);
 
-  // ── Добавить ──────────────────────────────────────────────────────────────
-  const addFeature = useCallback(async (feature: Omit<Feature, "id" | "status">): Promise<void> => {
+  // ── Добавить (возвращает true при успехе) ─────────────────────────────────
+  const addFeature = useCallback(async (feature: Omit<Feature, "id" | "status">): Promise<boolean> => {
     if (user === null) {
       const newFeature: Feature = { ...feature, id: generateAnonId(), status: "new" };
       setFeatures(prev => {
@@ -123,7 +139,7 @@ export function useFeatures(user: AuthUser | null) {
         saveAnon(updated);
         return updated;
       });
-      return;
+      return true;
     }
 
     setMutating(true);
@@ -136,8 +152,10 @@ export function useFeatures(user: AuthUser | null) {
       if (!res.ok) throw new Error("Не удалось добавить фичу");
       const data: Feature = await res.json();
       setFeatures(prev => [...prev, data]);
+      return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Ошибка добавления");
+      return false;
     } finally {
       setMutating(false);
     }
@@ -154,7 +172,8 @@ export function useFeatures(user: AuthUser | null) {
       return;
     }
 
-    setFeatures(prev => prev.filter(f => f.id !== id));
+    const prev = features;
+    setFeatures(p => p.filter(f => f.id !== id));
     try {
       const res = await fetch("/api/features", {
         method: "DELETE",
@@ -164,21 +183,23 @@ export function useFeatures(user: AuthUser | null) {
       if (!res.ok) throw new Error("Не удалось удалить фичу");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Ошибка удаления");
+      setFeatures(prev); // откат при ошибке
     }
-  }, [user]);
+  }, [user, features]);
 
-  // ── Обновить ──────────────────────────────────────────────────────────────
-  const updateFeature = useCallback(async (id: number, updates: Partial<Omit<Feature, "id">>): Promise<void> => {
+  // ── Обновить (возвращает true при успехе) ─────────────────────────────────
+  const updateFeature = useCallback(async (id: number, updates: Partial<Omit<Feature, "id">>): Promise<boolean> => {
     if (user === null) {
       setFeatures(prev => {
         const updated = prev.map(f => f.id === id ? { ...f, ...updates } : f);
         saveAnon(updated);
         return updated;
       });
-      return;
+      return true;
     }
 
-    setFeatures(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
+    const prev = features;
+    setFeatures(p => p.map(f => f.id === id ? { ...f, ...updates } : f));
 
     const apiBody: Record<string, string | number> = { id };
     if (updates.name !== undefined) apiBody.name = updates.name;
@@ -196,25 +217,29 @@ export function useFeatures(user: AuthUser | null) {
         body: JSON.stringify(apiBody),
       });
       if (!res.ok) throw new Error("Не удалось обновить фичу");
+      return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Ошибка обновления");
+      setFeatures(prev); // откат при ошибке
+      return false;
     }
-  }, [user]);
+  }, [user, features]);
 
   // ── Обновить статус ───────────────────────────────────────────────────────
-  const updateStatus = useCallback(async (id: number, status: Status): Promise<void> => {
-    await updateFeature(id, { status });
+  const updateStatus = useCallback(async (id: number, status: Status): Promise<boolean> => {
+    return updateFeature(id, { status });
   }, [updateFeature]);
 
   // ── Очистить всё ──────────────────────────────────────────────────────────
-  const clearAll = useCallback(async (): Promise<void> => {
+  const clearAll = useCallback(async (): Promise<boolean> => {
     if (user === null) {
       setFeatures([]);
       localStorage.removeItem(ANON_KEY);
       localStorage.removeItem(ANON_SEEDED_KEY);
-      return;
+      return true;
     }
 
+    const prev = features;
     setFeatures([]);
     try {
       const res = await fetch("/api/features", {
@@ -223,10 +248,13 @@ export function useFeatures(user: AuthUser | null) {
         body: JSON.stringify({ clearAll: true }),
       });
       if (!res.ok) throw new Error("Не удалось очистить бэклог");
+      return true;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Ошибка очистки");
+      setFeatures(prev); // откат при ошибке
+      return false;
     }
-  }, [user]);
+  }, [user, features]);
 
   return { features, loaded, error, mutating, addFeature, removeFeature, updateFeature, updateStatus, clearAll };
 }

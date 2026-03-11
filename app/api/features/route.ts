@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseServer } from "../../lib/supabase-server";
 import type { Feature } from "../../lib/types";
 
+const VALID_STATUSES = new Set(["new", "in-progress", "done", "deferred"]);
+
+function validateFeatureBody(body: Record<string, unknown>): string | null {
+  if (typeof body.name !== "string" || body.name.trim() === "") return "name обязателен";
+  if (typeof body.reach !== "number" || body.reach < 0) return "reach должен быть числом >= 0";
+  if (typeof body.impact !== "number") return "impact обязателен";
+  if (typeof body.confidence !== "number") return "confidence обязателен";
+  if (typeof body.effort !== "number" || body.effort <= 0) return "effort должен быть > 0";
+  if (body.status !== undefined && !VALID_STATUSES.has(body.status as string)) {
+    return `status должен быть одним из: ${[...VALID_STATUSES].join(", ")}`;
+  }
+  return null;
+}
+
 type SupabaseRow = {
   id: number;
   name: string;
@@ -54,12 +68,14 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
 
   const body = await request.json();
+  const validationError = validateFeatureBody(body);
+  if (validationError) return NextResponse.json({ error: validationError }, { status: 400 });
 
   const { data, error } = await supabase
     .from("features")
     .insert({
       user_id: user.id,
-      name: body.name,
+      name: (body.name as string).trim(),
       description: body.description ?? "",
       reach: body.reach,
       impact: body.impact,
@@ -81,6 +97,11 @@ export async function PUT(request: NextRequest) {
 
   const body = await request.json();
   const { id, ...fields } = body;
+
+  if (typeof id !== "number") return NextResponse.json({ error: "id обязателен" }, { status: 400 });
+  if (fields.status !== undefined && !VALID_STATUSES.has(fields.status)) {
+    return NextResponse.json({ error: `Невалидный status: ${fields.status}` }, { status: 400 });
+  }
 
   const updateData: Record<string, string | number> = {};
   if (fields.name !== undefined) updateData.name = fields.name;

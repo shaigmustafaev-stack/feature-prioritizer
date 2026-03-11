@@ -68,8 +68,8 @@ describe("RicePage integration", () => {
     originalFetch = global.fetch;
     global.fetch = vi.fn(makeFetchMock());
     localStorage.clear();
-    // Помечаем как уже мигрированного — чтобы не запускать миграцию в тестах
-    localStorage.setItem("producthub-migrated", "true");
+    // Помечаем как уже мигрированного — чтобы не запускать миграцию в тестах (scoped по user.id)
+    localStorage.setItem("producthub-migrated:test-user-id", "true");
   });
 
   afterEach(() => {

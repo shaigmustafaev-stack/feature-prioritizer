@@ -18,8 +18,8 @@ import { InfoTip } from "../../components/InfoTip";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 export default function Home() {
-  const { user } = useAuth();
-  const { features, loaded, error, mutating, addFeature, removeFeature, updateFeature, updateStatus, clearAll } = useFeatures(user);
+  const { user, loading: authLoading } = useAuth();
+  const { features, loaded, error, mutating, addFeature, removeFeature, updateFeature, updateStatus, clearAll } = useFeatures(user, authLoading);
 
   const [mode, setMode] = useState<ScoringMode>("RICE");
   const [form, setForm] = useState<FormState>({ ...EMPTY_FORM });
@@ -37,7 +37,7 @@ export default function Home() {
     const { valid, errors: e } = validateFeature(form, mode);
     setErrors(e);
     if (!valid) return;
-    await addFeature({
+    const ok = await addFeature({
       name: form.name.trim(),
       desc: form.desc.trim(),
       reach: Number(form.reach) || DEFAULT_REACH,
@@ -45,6 +45,7 @@ export default function Home() {
       confidence: Number(form.confidence),
       effort: Number(form.effort),
     });
+    if (!ok) return; // ошибка — форму не очищаем, error-баннер покажет причину
     setForm({ ...EMPTY_FORM });
     setErrors({});
     setJustAdded(true);
@@ -59,7 +60,7 @@ export default function Home() {
   const saveEdit = async () => {
     const { valid } = validateFeature(editForm, mode);
     if (!valid || editId === null) return;
-    await updateFeature(editId, {
+    const ok = await updateFeature(editId, {
       name: editForm.name.trim(),
       desc: editForm.desc.trim(),
       reach: Number(editForm.reach),
@@ -67,12 +68,12 @@ export default function Home() {
       confidence: Number(editForm.confidence),
       effort: Number(editForm.effort),
     });
-    setEditId(null);
+    if (ok) setEditId(null); // закрываем редактирование только при успехе
   };
 
-  const handleClear = () => {
+  const handleClear = async () => {
     if (confirmClear) {
-      clearAll();
+      await clearAll();
       setConfirmClear(false);
     } else {
       setConfirmClear(true);
