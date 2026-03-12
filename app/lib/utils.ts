@@ -1,5 +1,5 @@
 import { STATUSES } from "./types";
-import type { Feature, FormState, FormErrors, ScoringMode } from "./types";
+import type { Feature, FormState, FormErrors, ScoringMode, Metric, ChartType } from "./types";
 import { IMPACT_SCALE, CONF_OPTIONS } from "./constants";
 
 export const calcRice = (f: Feature): number =>
@@ -54,3 +54,40 @@ export const buildCsv = (features: Feature[]): string => {
   ]);
   return "\uFEFF" + [header.join(","), ...rows.map(r => r.join(","))].join("\n");
 };
+
+export const pickChartType = (metric: Metric, periodsCount: number): ChartType => {
+  const segmentCount = metric.rows.length
+
+  if (periodsCount === 1) {
+    if (segmentCount >= 6) return "horizontal-bar"
+    if (segmentCount >= 2) return "pie"
+    return "bar"
+  }
+
+  if (segmentCount <= 1 && periodsCount >= 3) return "line"
+  if (segmentCount >= 6) return "line"
+  if (segmentCount >= 2) return "bar"
+
+  return "bar"
+}
+
+export const calcDelta = (values: number[]): { value: number; percent: number } => {
+  if (values.length < 2) return { value: 0, percent: 0 }
+  const prev = values[values.length - 2]
+  const curr = values[values.length - 1]
+  const value = curr - prev
+  const percent = prev !== 0 ? (value / prev) * 100 : 0
+  return { value, percent }
+}
+
+export const formatMetricValue = (value: number): string => {
+  if (value >= 1_000_000) {
+    const m = value / 1_000_000
+    return m % 1 === 0 ? `${m}M` : `${parseFloat(m.toFixed(1))}M`
+  }
+  if (value >= 1_000) {
+    const k = value / 1_000
+    return k % 1 === 0 ? `${k}K` : `${parseFloat(k.toFixed(1))}K`
+  }
+  return String(value)
+}
