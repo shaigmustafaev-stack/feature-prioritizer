@@ -29,3 +29,50 @@ export interface FormState {
 }
 
 export type FormErrors = Partial<Record<"name" | "reach" | "effort", string>>;
+
+// --- Analytics ---
+
+export interface MetricRow {
+  label: string
+  values: number[]
+}
+
+export interface Metric {
+  id: string
+  name: string
+  segmentTag?: string
+  rows: MetricRow[]
+}
+
+export interface Period {
+  month: number
+  year: number
+}
+
+export type ChartType = "line" | "bar" | "pie" | "horizontal-bar"
+
+export interface Insight {
+  metricId: string
+  text: string
+}
+
+export interface Dashboard {
+  id: string
+  name: string
+  periods: Period[]
+  metrics: Metric[]
+  insights: Insight[]
+  created_at: string
+  user_id: string
+  share_id?: string
+}
+
+/** Raw row from Supabase — data is JSONB, not expanded */
+export interface DashboardRow {
+  id: string
+  name: string
+  data: { periods: Period[]; metrics: Metric[]; insights: Insight[] }
+  share_id: string | null
+  user_id: string
+  created_at: string
+}
