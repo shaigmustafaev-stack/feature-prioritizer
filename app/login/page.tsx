@@ -36,10 +36,16 @@ function LoginForm() {
         router.push(from);
         router.refresh();
       } else {
-        const { error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) throw error;
-        setInfo("Аккаунт создан. Проверьте почту для подтверждения, затем войдите.");
-        setTab("login");
+        // Если email confirmation отключён — сессия сразу есть, редиректим
+        if (data.session) {
+          router.push(from);
+          router.refresh();
+        } else {
+          setInfo("Аккаунт создан. Проверьте почту для подтверждения, затем войдите.");
+          setTab("login");
+        }
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Что-то пошло не так";
