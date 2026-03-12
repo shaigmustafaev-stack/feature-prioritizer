@@ -9,6 +9,13 @@ const tools = [
     desc: "Оцени и отсортируй фичи по формулам RICE и ICE. Найди что делать в первую очередь.",
     ready: true,
   },
+  {
+    href: "/tools/analytics",
+    icon: "📊",
+    title: "Аналитика продукта",
+    desc: "Дашборд метрик с графиками и AI-выводами",
+    ready: true,
+  },
 ];
 
 export default function Home() {
