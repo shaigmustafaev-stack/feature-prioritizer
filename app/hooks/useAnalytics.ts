@@ -80,10 +80,11 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
       const current = dashboardRef.current;
       if (!current || !user) return;
       try {
-        await fetch(`/api/analytics/dashboards/${current.id}`, {
+        await fetch("/api/analytics/dashboards", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            id: current.id,
             name: current.name,
             data: {
               periods: current.periods,
@@ -251,10 +252,11 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
       // Принудительное немедленное сохранение
       const current = dashboardRef.current;
       if (current) {
-        await fetch(`/api/analytics/dashboards/${current.id}`, {
+        await fetch("/api/analytics/dashboards", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
+            id: current.id,
             name: current.name,
             data: {
               periods: current.periods,
@@ -278,10 +280,11 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
     const current = dashboardRef.current;
     if (!current || !user) return;
     try {
-      const res = await fetch(`/api/analytics/dashboards/${current.id}`, {
+      const res = await fetch("/api/analytics/dashboards", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id: current.id,
           name: current.name,
           data: {
             periods: current.periods,
