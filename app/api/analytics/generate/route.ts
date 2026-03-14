@@ -38,9 +38,7 @@ export async function POST(request: NextRequest) {
   }
 
   const periodLabels = periods
-    .map((p: Period) =>
-      new Date(p.year, p.month).toLocaleDateString("ru-RU", { month: "short", year: "2-digit" })
-    )
+    .map((p: Period) => p.label)
     .join(", ");
 
   const prompt = `Ты — старший продуктовый аналитик. Отвечай на русском.

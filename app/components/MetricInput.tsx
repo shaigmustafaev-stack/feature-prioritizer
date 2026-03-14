@@ -21,8 +21,7 @@ interface MetricInputProps {
 }
 
 function formatPeriodLabel(p: Period): string {
-  const date = new Date(p.year, p.month)
-  return date.toLocaleDateString("ru-RU", { month: "short", year: "2-digit" })
+  return p.label
 }
 
 export function MetricInput({ metric, periods, onUpdate, onRemove, onRemovePeriod }: MetricInputProps) {

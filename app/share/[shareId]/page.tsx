@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { DashboardViewWrapper } from "./DashboardViewWrapper";
+import { migratePeriod } from "../../lib/utils";
 import type { DashboardRow } from "../../lib/types";
 
 interface PageProps {
@@ -54,7 +55,7 @@ export default async function SharePage({ params }: PageProps) {
       {/* Дашборд (клиентский компонент — recharts требует браузер) */}
       <DashboardViewWrapper
         metrics={row.data?.metrics ?? []}
-        periods={row.data?.periods ?? []}
+        periods={(row.data?.periods ?? []).map(migratePeriod)}
         insights={row.data?.insights ?? []}
       />
     </div>

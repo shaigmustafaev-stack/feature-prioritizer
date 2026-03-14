@@ -8,10 +8,11 @@ import { MetricInput } from "../../../components/MetricInput";
 import { DashboardView } from "../../../components/DashboardView";
 import { ShareModal } from "../../../components/ShareModal";
 import { AuthGateDialog } from "../../../components/AuthGateDialog";
+import { CsvUploadButton } from "../../../components/CsvUploadButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import type { Metric } from "../../../lib/types";
+import type { Metric, Period } from "../../../lib/types";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -41,6 +42,10 @@ export default function DashboardEditorPage({ params }: PageProps) {
   } = useAnalytics(id, user);
 
   const [showAuthGate, setShowAuthGate] = useState(false);
+
+  const handleCsvImport = (metrics: Metric[], periods: Period[]) => {
+    updateDashboard({ metrics, periods, insights: [] });
+  };
 
   const handleAnalyze = async () => {
     const result = await analyze();
@@ -160,6 +165,7 @@ export default function DashboardEditorPage({ params }: PageProps) {
               <Button variant="outline" onClick={addPeriod}>
                 + Добавить период
               </Button>
+              <CsvUploadButton onImport={handleCsvImport} />
             </div>
 
             {/* Кнопка анализа */}

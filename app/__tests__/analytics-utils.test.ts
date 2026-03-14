@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { pickChartType, calcDelta, formatMetricValue } from "../lib/utils"
+import { pickChartType, calcDelta, formatMetricValue, migratePeriod } from "../lib/utils"
 import type { Metric } from "../lib/types"
 
 const makeMetric = (rows: number): Metric => ({
@@ -96,5 +96,22 @@ describe("formatMetricValue", () => {
 
   it("handles zero", () => {
     expect(formatMetricValue(0)).toBe("0")
+  })
+})
+
+describe("migratePeriod", () => {
+  it("passes through new format unchanged", () => {
+    expect(migratePeriod({ label: "Q1 2025" })).toEqual({ label: "Q1 2025" })
+  })
+
+  it("converts old format { month: 0, year: 2025 } to label", () => {
+    const result = migratePeriod({ month: 0, year: 2025 })
+    expect(result.label).toBeTruthy()
+    expect(typeof result.label).toBe("string")
+  })
+
+  it("converts month 11 year 2024", () => {
+    const result = migratePeriod({ month: 11, year: 2024 })
+    expect(result.label).toBeTruthy()
   })
 })

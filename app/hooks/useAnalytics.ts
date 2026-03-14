@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import type { Dashboard, DashboardRow, Metric, Period, Insight } from "../lib/types";
+import { migratePeriod } from "../lib/utils";
 
 // Минимальный тип пользователя — не импортируем весь @supabase/supabase-js
 type AuthUser = { id: string; email?: string | null };
@@ -14,14 +15,14 @@ function createEmptyMetric(): Metric {
 
 function createDefaultPeriod(): Period {
   const now = new Date();
-  return { month: now.getMonth(), year: now.getFullYear() };
+  return { label: now.toLocaleDateString("ru-RU", { month: "short", year: "2-digit" }) };
 }
 
 function normalizeDashboardRow(row: DashboardRow): Dashboard {
   return {
     id: row.id,
     name: row.name,
-    periods: row.data?.periods ?? [],
+    periods: (row.data?.periods ?? []).map(migratePeriod),
     metrics: row.data?.metrics ?? [],
     insights: row.data?.insights ?? [],
     created_at: row.created_at,
@@ -179,17 +180,12 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
   const addPeriod = useCallback(() => {
     setDashboard((prev) => {
       if (!prev) return prev;
-      // Авто-инкремент: следующий месяц от последнего периода
       let newPeriod: Period;
       if (prev.periods.length === 0) {
         newPeriod = createDefaultPeriod();
       } else {
-        const last = prev.periods[prev.periods.length - 1];
-        const nextMonth = last.month + 1;
-        newPeriod =
-          nextMonth > 11
-            ? { month: 0, year: last.year + 1 }
-            : { month: nextMonth, year: last.year };
+        const periodNum = prev.periods.length + 1;
+        newPeriod = { label: `Период ${periodNum}` };
       }
 
       // Добавляем 0 во все строки всех метрик для нового периода

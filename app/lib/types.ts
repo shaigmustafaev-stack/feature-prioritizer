@@ -45,8 +45,7 @@ export interface Metric {
 }
 
 export interface Period {
-  month: number
-  year: number
+  label: string
 }
 
 export type ChartType = "line" | "bar" | "pie" | "horizontal-bar"
