@@ -1,11 +1,13 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
+import { toast } from "sonner";
 import { useAuth } from "../../../hooks/useAuth";
 import { useAnalytics } from "../../../hooks/useAnalytics";
 import { MetricInput } from "../../../components/MetricInput";
 import { DashboardView } from "../../../components/DashboardView";
 import { ShareModal } from "../../../components/ShareModal";
+import { AuthGateDialog } from "../../../components/AuthGateDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -38,6 +40,25 @@ export default function DashboardEditorPage({ params }: PageProps) {
     share,
   } = useAnalytics(id, user);
 
+  const [showAuthGate, setShowAuthGate] = useState(false);
+
+  const handleAnalyze = async () => {
+    const result = await analyze();
+    if (result === "needs-auth") { setShowAuthGate(true); return; }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleSave = async () => {
+    const result = await save();
+    if (result === "needs-auth") { setShowAuthGate(true); return; }
+    toast.success("Сохранено \u2713");
+  };
+
+  const handleShare = async () => {
+    const result = await share();
+    if (result === "needs-auth") { setShowAuthGate(true); return; }
+  };
+
   // ── Загрузка ──────────────────────────────────────────────────────────────
   if (authLoading || loading) {
     return (
@@ -51,15 +72,6 @@ export default function DashboardEditorPage({ params }: PageProps) {
         {[1, 2].map((i) => (
           <div key={i} className="h-40 animate-pulse rounded-xl bg-muted" />
         ))}
-      </div>
-    );
-  }
-
-  // ── Нет авторизации ───────────────────────────────────────────────────────
-  if (!user) {
-    return (
-      <div className="mx-auto max-w-[860px] px-4 py-8 text-center text-muted-foreground">
-        <p>Войдите, чтобы редактировать дашборд</p>
       </div>
     );
   }
@@ -86,11 +98,11 @@ export default function DashboardEditorPage({ params }: PageProps) {
           placeholder="Название дашборда"
           aria-label="Название дашборда"
         />
-        <Button variant="outline" onClick={save}>
+        <Button variant="outline" onClick={handleSave}>
           Сохранить
         </Button>
         {id !== "new" && (
-          <Button variant="outline" onClick={share}>
+          <Button variant="outline" onClick={handleShare}>
             🔗 Поделиться
           </Button>
         )}
@@ -154,7 +166,7 @@ export default function DashboardEditorPage({ params }: PageProps) {
             {dashboard.metrics.length > 0 && dashboard.periods.length > 0 && (
               <Button
                 className="w-full h-11 text-base font-semibold"
-                onClick={analyze}
+                onClick={handleAnalyze}
                 disabled={analyzing}
               >
                 {analyzing ? "Анализируем..." : "✨ Анализировать"}
@@ -179,6 +191,9 @@ export default function DashboardEditorPage({ params }: PageProps) {
         shareId={shareModalId}
         onClose={() => setShareModalId(null)}
       />
+
+      {/* Модал авторизации */}
+      <AuthGateDialog open={showAuthGate} onClose={() => setShowAuthGate(false)} />
     </div>
   );
 }

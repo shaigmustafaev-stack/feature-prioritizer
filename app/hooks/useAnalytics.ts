@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import type { Dashboard, DashboardRow, Metric, Period } from "../lib/types";
+import type { Dashboard, DashboardRow, Metric, Period, Insight } from "../lib/types";
 
 // Минимальный тип пользователя — не импортируем весь @supabase/supabase-js
 type AuthUser = { id: string; email?: string | null };
@@ -46,11 +46,26 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
 
   // ── Загрузка ──────────────────────────────────────────────────────────────
   useEffect(() => {
+    // Анонимный режим: локальный пустой дашборд
     if (!user) {
+      if (dashboardId === "new") {
+        const local: Dashboard = {
+          id: "new",
+          name: "Новый дашборд",
+          periods: [],
+          metrics: [],
+          insights: [],
+          created_at: new Date().toISOString(),
+          user_id: "",
+        };
+        setDashboard(local);
+        dashboardRef.current = local;
+      }
       setLoading(false);
       return;
     }
 
+    // Авторизованный режим: загрузка из API
     const load = async () => {
       setLoading(true);
       setError(null);
@@ -224,8 +239,9 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
   );
 
   // ── Анализ ────────────────────────────────────────────────────────────────
-  const analyze = useCallback(async () => {
-    if (!dashboard || !user) return;
+  const analyze = useCallback(async (): Promise<"needs-auth" | void> => {
+    if (!user) return "needs-auth";
+    if (!dashboard) return;
     setAnalyzing(true);
     setError(null);
     try {
@@ -284,9 +300,10 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
   }, [dashboard, user]);
 
   // ── Ручное сохранение ─────────────────────────────────────────────────────
-  const save = useCallback(async () => {
+  const save = useCallback(async (): Promise<"needs-auth" | void> => {
+    if (!user) return "needs-auth";
     const current = dashboardRef.current;
-    if (!current || !user) return;
+    if (!current) return;
     try {
       const res = await fetch("/api/analytics/dashboards", {
         method: "PUT",
@@ -308,9 +325,10 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
   }, [user]);
 
   // ── Поделиться ────────────────────────────────────────────────────────────
-  const share = useCallback(async () => {
+  const share = useCallback(async (): Promise<"needs-auth" | void> => {
+    if (!user) return "needs-auth";
     const current = dashboardRef.current;
-    if (!current || !user) return;
+    if (!current) return;
     try {
       const res = await fetch("/api/analytics/share", {
         method: "POST",

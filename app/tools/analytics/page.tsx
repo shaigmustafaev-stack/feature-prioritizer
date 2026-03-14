@@ -8,6 +8,16 @@ import type { DashboardRow } from "../../lib/types";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
 
 export default function AnalyticsListPage() {
   const { user, loading: authLoading } = useAuth();
@@ -17,6 +27,7 @@ export default function AnalyticsListPage() {
   const [loaded, setLoaded] = useState(false);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
   // ── Загрузка списка дашбордов ─────────────────────────────────────────────
   useEffect(() => {
@@ -44,7 +55,10 @@ export default function AnalyticsListPage() {
 
   // ── Создать новый дашборд ─────────────────────────────────────────────────
   const handleCreate = async () => {
-    if (!user) return;
+    if (!user) {
+      router.push("/tools/analytics/new");
+      return;
+    }
     setCreating(true);
     setError(null);
     try {
@@ -64,8 +78,8 @@ export default function AnalyticsListPage() {
 
   // ── Удалить дашборд ───────────────────────────────────────────────────────
   const handleDelete = async (id: string) => {
-    if (!confirm("Удалить этот дашборд? Действие нельзя отменить.")) return;
     const prev = dashboards;
+    setDeleteTarget(null);
     setDashboards((d) => d.filter((db) => db.id !== id));
     try {
       const res = await fetch("/api/analytics/dashboards", {
@@ -80,28 +94,8 @@ export default function AnalyticsListPage() {
     }
   };
 
-  // ── Рендер: не авторизован ────────────────────────────────────────────────
-  if (!authLoading && !user) {
-    return (
-      <div className="mx-auto max-w-[860px] px-4 py-8">
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
-            <div className="text-4xl">📊</div>
-            <h2 className="text-lg font-semibold">Войдите, чтобы использовать аналитику</h2>
-            <p className="text-sm text-muted-foreground">
-              Дашборды сохраняются в вашем аккаунте и доступны на любом устройстве
-            </p>
-            <Link href="/login">
-              <Button>Войти</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   // ── Рендер: скелетон загрузки ─────────────────────────────────────────────
-  if (authLoading || !loaded) {
+  if (user && (authLoading || !loaded)) {
     return (
       <div className="mx-auto max-w-[860px] px-4 py-8 space-y-3">
         <div className="flex items-center justify-between mb-6">
@@ -199,7 +193,7 @@ export default function AnalyticsListPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDelete(db.id)}
+                      onClick={() => setDeleteTarget(db.id)}
                       aria-label="Удалить дашборд"
                       className="text-muted-foreground hover:text-destructive"
                     >
@@ -212,6 +206,27 @@ export default function AnalyticsListPage() {
           })}
         </div>
       )}
+
+      {/* Подтверждение удаления */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(v) => !v && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Удалить дашборд?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Это действие нельзя отменить. Дашборд и все данные будут удалены.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Отмена</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={() => deleteTarget && handleDelete(deleteTarget)}
+            >
+              Удалить
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
