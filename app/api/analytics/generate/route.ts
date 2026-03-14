@@ -59,42 +59,99 @@ export async function POST(request: NextRequest) {
 [{"metricId": "<id метрики>", "text": "<вывод>"}]
 Без markdown, без \`\`\`, только JSON массив.`;
 
-  let claudeResponse: Response;
+  // Приоритет: OpenRouter → Gemini → Claude
+  const openrouterKey = process.env.OPENROUTER_API_KEY;
+  const geminiKey = process.env.GEMINI_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+
+  let aiResponse: Response;
   try {
-    claudeResponse = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": process.env.ANTHROPIC_API_KEY ?? "",
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model: "claude-haiku-4-5-20251001",
-        max_tokens: 4096,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    });
+    if (openrouterKey) {
+      // OpenRouter API (OpenAI-совместимый, бесплатные модели, без региональных ограничений)
+      aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${openrouterKey}`,
+        },
+        body: JSON.stringify({
+          model: "openrouter/free",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.7,
+          max_tokens: 4096,
+        }),
+      });
+    } else if (geminiKey) {
+      // Google Gemini API (напрямую)
+      aiResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 4096,
+            },
+          }),
+        }
+      );
+    } else if (anthropicKey) {
+      // Claude API (fallback)
+      aiResponse = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": anthropicKey,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-haiku-4-5-20251001",
+          max_tokens: 4096,
+          messages: [{ role: "user", content: prompt }],
+        }),
+      });
+    } else {
+      return NextResponse.json(
+        { error: "AI API ключ не настроен. Добавьте OPENROUTER_API_KEY, GEMINI_API_KEY или ANTHROPIC_API_KEY в .env.local" },
+        { status: 500 }
+      );
+    }
   } catch {
-    return NextResponse.json({ error: "Ошибка сети при обращении к Claude API" }, { status: 500 });
+    return NextResponse.json({ error: "Ошибка сети при обращении к AI API" }, { status: 500 });
   }
 
-  if (!claudeResponse.ok) {
-    const errText = await claudeResponse.text().catch(() => "");
+  if (!aiResponse.ok) {
+    const errText = await aiResponse.text().catch(() => "");
     return NextResponse.json(
-      { error: `Ошибка Claude API: ${claudeResponse.status} ${errText}` },
+      { error: `Ошибка AI API: ${aiResponse.status} ${errText}` },
       { status: 502 }
     );
   }
 
-  const claudeData = await claudeResponse.json();
-  const rawText: string = claudeData?.content?.[0]?.text ?? "";
+  const aiData = await aiResponse.json();
+
+  // Извлекаем текст в зависимости от API
+  let rawText: string;
+  if (openrouterKey) {
+    // OpenAI-совместимый формат
+    rawText = aiData?.choices?.[0]?.message?.content ?? "";
+  } else if (geminiKey) {
+    rawText = aiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+  } else {
+    rawText = aiData?.content?.[0]?.text ?? "";
+  }
+
+  // Иногда AI оборачивает JSON в ```json ... ``` — удаляем
+  rawText = rawText.replace(/^```json\s*/i, "").replace(/\s*```$/i, "").trim();
 
   let insights: Insight[];
   try {
     insights = JSON.parse(rawText) as Insight[];
   } catch {
     return NextResponse.json(
-      { error: "Не удалось разобрать ответ Claude как JSON", raw: rawText },
+      { error: "Не удалось разобрать ответ AI как JSON", raw: rawText },
       { status: 502 }
     );
   }

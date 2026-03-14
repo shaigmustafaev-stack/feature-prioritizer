@@ -307,15 +307,15 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
       const res = await fetch("/api/analytics/share", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dashboardId: current.id }),
+        body: JSON.stringify({ id: current.id }),
       });
       if (!res.ok) throw new Error("Не удалось создать ссылку");
-      const { share_id } = await res.json();
-      setShareModalId(share_id);
+      const { shareId } = await res.json();
+      setShareModalId(shareId);
       // Обновляем share_id в state
       setDashboard((prev) => {
         if (!prev) return prev;
-        const next = { ...prev, share_id };
+        const next = { ...prev, share_id: shareId };
         dashboardRef.current = next;
         return next;
       });
