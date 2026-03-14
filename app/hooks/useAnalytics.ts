@@ -18,6 +18,28 @@ function createDefaultPeriod(): Period {
   return { label: now.toLocaleDateString("ru-RU", { month: "short", year: "2-digit" }) };
 }
 
+/** Парсит краткий месяц-год ("янв. 25") и возвращает следующий месяц в том же формате */
+function parseAndAdvanceMonth(label: string): string {
+  const months = ["янв.", "февр.", "мар.", "апр.", "мая", "июн.", "июл.", "авг.", "сент.", "окт.", "нояб.", "дек."];
+  const lower = label.toLowerCase().trim();
+  const idx = months.findIndex((m) => lower.startsWith(m));
+  if (idx === -1) {
+    // Не удалось распарсить — fallback
+    const now = new Date();
+    now.setMonth(now.getMonth() + 1);
+    return now.toLocaleDateString("ru-RU", { month: "short", year: "2-digit" });
+  }
+  const yearMatch = lower.match(/(\d{2,4})$/);
+  let year = yearMatch ? parseInt(yearMatch[1], 10) : new Date().getFullYear() % 100;
+  let nextMonth = idx + 1;
+  if (nextMonth > 11) {
+    nextMonth = 0;
+    year += 1;
+  }
+  const d = new Date(2000 + (year < 100 ? year : year - 2000), nextMonth, 1);
+  return d.toLocaleDateString("ru-RU", { month: "short", year: "2-digit" });
+}
+
 function normalizeDashboardRow(row: DashboardRow): Dashboard {
   return {
     id: row.id,
@@ -184,8 +206,10 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
       if (prev.periods.length === 0) {
         newPeriod = createDefaultPeriod();
       } else {
-        const periodNum = prev.periods.length + 1;
-        newPeriod = { label: `Период ${periodNum}` };
+        // Следующий месяц от последнего периода или текущей даты
+        const lastLabel = prev.periods[prev.periods.length - 1].label;
+        const nextDate = parseAndAdvanceMonth(lastLabel);
+        newPeriod = { label: nextDate };
       }
 
       // Добавляем 0 во все строки всех метрик для нового периода
@@ -225,6 +249,22 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
           ...prev,
           periods: prev.periods.filter((_, i) => i !== periodIdx),
           metrics: updatedMetrics,
+        };
+        dashboardRef.current = next;
+        return next;
+      });
+      triggerAutoSave();
+    },
+    [triggerAutoSave]
+  );
+
+  const updatePeriod = useCallback(
+    (periodIdx: number, label: string) => {
+      setDashboard((prev) => {
+        if (!prev) return prev;
+        const next = {
+          ...prev,
+          periods: prev.periods.map((p, i) => (i === periodIdx ? { label } : p)),
         };
         dashboardRef.current = next;
         return next;
@@ -361,6 +401,7 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
     updateMetric,
     addPeriod,
     removePeriod,
+    updatePeriod,
     analyze,
     save,
     share,

@@ -12,7 +12,14 @@ interface DashboardViewProps {
 }
 
 export function DashboardView({ metrics, periods, insights, analyzing }: DashboardViewProps) {
-  if (!metrics.length) {
+  // Фильтруем пустые метрики: без имени или со всеми нулями
+  const visibleMetrics = metrics.filter((m) => {
+    if (!m.name.trim()) return false
+    const allZero = m.rows.every((row) => row.values.every((v) => v === 0))
+    return !allZero
+  })
+
+  if (!visibleMetrics.length) {
     return (
       <div className="text-center py-12 text-muted-foreground">
         <p className="text-lg">Нет данных для отображения</p>
@@ -21,7 +28,7 @@ export function DashboardView({ metrics, periods, insights, analyzing }: Dashboa
     )
   }
 
-  const kpiData = metrics.map((m) => ({
+  const kpiData = visibleMetrics.map((m) => ({
     name: m.name,
     values: m.rows.length === 1
       ? m.rows[0].values
@@ -34,7 +41,7 @@ export function DashboardView({ metrics, periods, insights, analyzing }: Dashboa
         {kpiData.map((kpi) => <KpiCard key={kpi.name} name={kpi.name} values={kpi.values} />)}
       </div>
       <div className="space-y-4">
-        {metrics.map((metric) => (
+        {visibleMetrics.map((metric) => (
           <ChartBlock key={metric.id} metric={metric} periods={periods}
             insight={insights.find((ins) => ins.metricId === metric.id)} analyzing={analyzing} />
         ))}

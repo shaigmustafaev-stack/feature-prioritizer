@@ -47,7 +47,7 @@ export function ChartBlock({ metric, periods, insight, analyzing }: ChartBlockPr
       <h3 className="font-semibold text-base">
         {metric.name}
         {metric.segmentTag && (
-          <span className="ml-2 text-sm text-muted-foreground font-normal">{metric.segmentTag}</span>
+          <span className="ml-2 text-sm text-muted-foreground font-normal">— {metric.segmentTag}</span>
         )}
       </h3>
 

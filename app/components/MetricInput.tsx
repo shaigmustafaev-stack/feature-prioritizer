@@ -1,9 +1,35 @@
 "use client"
 
+import { useState } from "react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select"
 import type { Metric, Period } from "../lib/types"
+
+/** Числовая ячейка: позволяет пустое поле при вводе, коммитит число на blur */
+function NumericCell({ value, onChange }: { value: number; onChange: (val: string) => void }) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState("")
+
+  return (
+    <Input
+      type="number"
+      value={editing ? draft : value}
+      onFocus={(e) => {
+        setEditing(true)
+        setDraft(e.target.value)
+        e.target.select()
+      }}
+      onChange={(e) => {
+        setDraft(e.target.value)
+        onChange(e.target.value)
+      }}
+      onBlur={() => setEditing(false)}
+      className="h-7 text-sm text-center"
+    />
+  )
+}
 
 const SEGMENT_PRESETS = [
   { value: "", label: "Без разреза" },
@@ -18,17 +44,26 @@ interface MetricInputProps {
   onUpdate: (metric: Metric) => void
   onRemove: () => void
   onRemovePeriod?: (periodIdx: number) => void
+  onUpdatePeriod?: (periodIdx: number, label: string) => void
 }
 
 function formatPeriodLabel(p: Period): string {
   return p.label
 }
 
-export function MetricInput({ metric, periods, onUpdate, onRemove, onRemovePeriod }: MetricInputProps) {
+export function MetricInput({ metric, periods, onUpdate, onRemove, onRemovePeriod, onUpdatePeriod }: MetricInputProps) {
   const updateName = (name: string) => onUpdate({ ...metric, name })
 
   const updateSegmentTag = (tag: string | null) => {
     if (tag === null) return
+    // Предупреждение при сбросе сегментации — данные сегментов будут потеряны
+    if (!tag && metric.rows.length > 1) {
+      const confirmed = window.confirm(
+        `Сбросить разрез? Данные ${metric.rows.length - 1} сегментов будут удалены.`
+      )
+      if (!confirmed) return
+      toast.info("Сегменты сброшены, оставлена первая строка")
+    }
     const newMetric = { ...metric, segmentTag: tag || undefined }
     if (!tag && metric.rows.length > 1) {
       newMetric.rows = [{ label: "", values: metric.rows[0]?.values || periods.map(() => 0) }]
@@ -40,7 +75,7 @@ export function MetricInput({ metric, periods, onUpdate, onRemove, onRemovePerio
     const rows = metric.rows.map((row, ri) => {
       if (ri !== rowIdx) return row
       const values = [...row.values]
-      values[colIdx] = val === "" ? 0 : Number(val)
+      values[colIdx] = val === "" || val === "-" ? 0 : Number(val)
       return { ...row, values }
     })
     onUpdate({ ...metric, rows })
@@ -98,12 +133,22 @@ export function MetricInput({ metric, periods, onUpdate, onRemove, onRemovePerio
               {periods.map((p, i) => (
                 <th key={i} className="text-center px-1 py-1 text-muted-foreground font-medium min-w-[72px]">
                   <span className="inline-flex items-center gap-0.5">
-                    {formatPeriodLabel(p)}
+                    {onUpdatePeriod ? (
+                      <input
+                        type="text"
+                        value={formatPeriodLabel(p)}
+                        onChange={(e) => onUpdatePeriod(i, e.target.value)}
+                        className="w-full bg-transparent text-center text-sm font-medium text-muted-foreground outline-none focus:text-foreground focus:ring-1 focus:ring-ring rounded px-1"
+                        aria-label={`Название периода ${i + 1}`}
+                      />
+                    ) : (
+                      formatPeriodLabel(p)
+                    )}
                     {onRemovePeriod && periods.length > 1 && (
                       <button
                         type="button"
                         onClick={() => onRemovePeriod(i)}
-                        className="ml-0.5 text-muted-foreground/50 hover:text-destructive transition-colors"
+                        className="ml-0.5 text-muted-foreground/50 hover:text-destructive transition-colors shrink-0"
                         aria-label={`Удалить период ${formatPeriodLabel(p)}`}
                       >
                         ×
@@ -130,11 +175,9 @@ export function MetricInput({ metric, periods, onUpdate, onRemove, onRemovePerio
                 )}
                 {periods.map((_, ci) => (
                   <td key={ci} className="px-1 py-1">
-                    <Input
-                      type="number"
+                    <NumericCell
                       value={row.values[ci] ?? 0}
-                      onChange={(e) => updateValue(ri, ci, e.target.value)}
-                      className="h-7 text-sm text-center"
+                      onChange={(val) => updateValue(ri, ci, val)}
                     />
                   </td>
                 ))}

@@ -36,6 +36,7 @@ export default function DashboardEditorPage({ params }: PageProps) {
     updateMetric,
     addPeriod,
     removePeriod,
+    updatePeriod,
     analyze,
     save,
     share,
@@ -106,7 +107,7 @@ export default function DashboardEditorPage({ params }: PageProps) {
         <Button variant="outline" onClick={handleSave}>
           Сохранить
         </Button>
-        {id !== "new" && (
+        {id !== "new" && dashboard.metrics.length > 0 && (
           <Button variant="outline" onClick={handleShare}>
             🔗 Поделиться
           </Button>
@@ -144,6 +145,7 @@ export default function DashboardEditorPage({ params }: PageProps) {
                 onUpdate={updateMetric}
                 onRemove={() => removeMetric(metric.id)}
                 onRemovePeriod={removePeriod}
+                onUpdatePeriod={updatePeriod}
               />
             ))}
 
