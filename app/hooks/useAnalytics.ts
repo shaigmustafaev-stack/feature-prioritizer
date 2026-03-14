@@ -18,15 +18,16 @@ function createDefaultPeriod(): Period {
   return { label: now.toLocaleDateString("ru-RU", { month: "short", year: "2-digit" }) };
 }
 
-/** Парсит краткий месяц-год ("янв. 25") и возвращает следующий месяц в том же формате */
-function parseAndAdvanceMonth(label: string): string {
+/** Парсит краткий месяц-год ("янв. 25") и возвращает следующий месяц в том же формате.
+ *  periodIndex — порядковый номер нового периода (для fallback-смещения) */
+function parseAndAdvanceMonth(label: string, periodIndex: number): string {
   const months = ["янв.", "февр.", "мар.", "апр.", "мая", "июн.", "июл.", "авг.", "сент.", "окт.", "нояб.", "дек."];
   const lower = label.toLowerCase().trim();
   const idx = months.findIndex((m) => lower.startsWith(m));
   if (idx === -1) {
-    // Не удалось распарсить — fallback
+    // Не удалось распарсить — fallback: текущий месяц + смещение на номер периода
     const now = new Date();
-    now.setMonth(now.getMonth() + 1);
+    now.setMonth(now.getMonth() + periodIndex);
     return now.toLocaleDateString("ru-RU", { month: "short", year: "2-digit" });
   }
   const yearMatch = lower.match(/(\d{2,4})$/);
@@ -69,21 +70,25 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
 
   // ── Загрузка ──────────────────────────────────────────────────────────────
   useEffect(() => {
-    // Анонимный режим: локальный пустой дашборд
+    // Новый дашборд — создаём локально (для анонимных и авторизованных)
+    if (dashboardId === "new") {
+      const local: Dashboard = {
+        id: "new",
+        name: "Новый дашборд",
+        periods: [],
+        metrics: [],
+        insights: [],
+        created_at: new Date().toISOString(),
+        user_id: user?.id ?? "",
+      };
+      setDashboard(local);
+      dashboardRef.current = local;
+      setLoading(false);
+      return;
+    }
+
+    // Анонимный режим без конкретного дашборда
     if (!user) {
-      if (dashboardId === "new") {
-        const local: Dashboard = {
-          id: "new",
-          name: "Новый дашборд",
-          periods: [],
-          metrics: [],
-          insights: [],
-          created_at: new Date().toISOString(),
-          user_id: "",
-        };
-        setDashboard(local);
-        dashboardRef.current = local;
-      }
       setLoading(false);
       return;
     }
@@ -208,7 +213,7 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
       } else {
         // Следующий месяц от последнего периода или текущей даты
         const lastLabel = prev.periods[prev.periods.length - 1].label;
-        const nextDate = parseAndAdvanceMonth(lastLabel);
+        const nextDate = parseAndAdvanceMonth(lastLabel, prev.periods.length);
         newPeriod = { label: nextDate };
       }
 

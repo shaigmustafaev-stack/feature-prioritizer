@@ -39,7 +39,7 @@ export function parseCSVToMetrics(data: Row[]): ParseResult | null {
   // Step 2: Build row labels
   const labels: string[] = data.map((row, i) => {
     if (textCols.length === 0) return String(i + 1)
-    return textCols.map(col => String(row[col] ?? "")).join(" · ")
+    return textCols.map(col => String(row[col] ?? "")).filter(Boolean).join(" · ") || String(i + 1)
   })
 
   // Step 3: Group by label and aggregate (sum)

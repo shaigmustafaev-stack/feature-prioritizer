@@ -58,8 +58,9 @@ export function MetricInput({ metric, periods, onUpdate, onRemove, onRemovePerio
     if (tag === null) return
     // Предупреждение при сбросе сегментации — данные сегментов будут потеряны
     if (!tag && metric.rows.length > 1) {
+      const firstLabel = metric.rows[0].label || "первая строка"
       const confirmed = window.confirm(
-        `Сбросить разрез? Данные ${metric.rows.length - 1} сегментов будут удалены.`
+        `Сбросить разрез? Останется только «${firstLabel}», остальные ${metric.rows.length - 1} строк будут удалены.`
       )
       if (!confirmed) return
       toast.info("Сегменты сброшены, оставлена первая строка")
