@@ -58,7 +58,7 @@ export function ChartBlock({ metric, periods, insight, analyzing }: ChartBlockPr
             <LineChart data={data}>
               <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
               <XAxis dataKey="period" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} tickFormatter={formatMetricValue} />
+              <YAxis tick={{ fontSize: 12 }} tickFormatter={formatMetricValue} domain={["auto", "auto"]} />
               <Tooltip formatter={(v: unknown) => formatMetricValue(v as number)} />
               {rowKeys.length > 1 && <Legend />}
               {rowKeys.map((key, i) => (
@@ -89,7 +89,7 @@ export function ChartBlock({ metric, periods, insight, analyzing }: ChartBlockPr
               ) : (
                 <>
                   <XAxis dataKey="period" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} tickFormatter={formatMetricValue} />
+                  <YAxis tick={{ fontSize: 12 }} tickFormatter={formatMetricValue} domain={["auto", "auto"]} />
                 </>
               )}
               <Tooltip formatter={(v: unknown) => formatMetricValue(v as number)} />
@@ -109,23 +109,27 @@ export function ChartBlock({ metric, periods, insight, analyzing }: ChartBlockPr
             Анализирую...
           </div>
         ) : insight?.summary ? (
-          <div className="space-y-2">
-            <p className="text-sm font-semibold">{insight.summary}</p>
+          <div className="space-y-3">
+            <p className="text-sm font-semibold bg-muted p-3 rounded-lg">{insight.summary}</p>
             {insight.detail && (
               <p className="text-sm text-muted-foreground leading-relaxed">{insight.detail}</p>
             )}
             {insight.hypotheses && insight.hypotheses.length > 0 && (
-              <div className="space-y-1">
+              <div className="space-y-1.5">
+                <p className="text-xs uppercase tracking-wide font-semibold text-muted-foreground">◆ Гипотезы</p>
                 {insight.hypotheses.map((h, i) => (
-                  <div key={i} className="text-sm border-l-2 border-amber-400 pl-3 py-1 bg-amber-400/5 rounded-r">
+                  <div key={i} className="text-sm border-l-3 border-amber-500 p-3 bg-amber-500/10 rounded-r-lg">
                     {h}
                   </div>
                 ))}
               </div>
             )}
             {insight.action && (
-              <div className="text-sm border-l-2 border-emerald-500 pl-3 py-1 bg-emerald-500/5 rounded-r font-medium">
-                Проверить: {insight.action}
+              <div>
+                <p className="text-xs uppercase tracking-wide font-semibold text-muted-foreground mb-1.5">→ Проверить</p>
+                <div className="text-sm border-l-3 border-emerald-500 p-3 bg-emerald-500/10 rounded-r-lg font-medium">
+                  {insight.action}
+                </div>
               </div>
             )}
           </div>

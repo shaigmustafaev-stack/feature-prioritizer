@@ -17,6 +17,7 @@ interface MetricInputProps {
   periods: Period[]
   onUpdate: (metric: Metric) => void
   onRemove: () => void
+  onRemovePeriod?: (periodIdx: number) => void
 }
 
 function formatPeriodLabel(p: Period): string {
@@ -24,7 +25,7 @@ function formatPeriodLabel(p: Period): string {
   return date.toLocaleDateString("ru-RU", { month: "short", year: "2-digit" })
 }
 
-export function MetricInput({ metric, periods, onUpdate, onRemove }: MetricInputProps) {
+export function MetricInput({ metric, periods, onUpdate, onRemove, onRemovePeriod }: MetricInputProps) {
   const updateName = (name: string) => onUpdate({ ...metric, name })
 
   const updateSegmentTag = (tag: string | null) => {
@@ -97,7 +98,19 @@ export function MetricInput({ metric, periods, onUpdate, onRemove }: MetricInput
               {metric.segmentTag && <th className="text-left pr-2 py-1 text-muted-foreground font-medium min-w-[100px]">Сегмент</th>}
               {periods.map((p, i) => (
                 <th key={i} className="text-center px-1 py-1 text-muted-foreground font-medium min-w-[72px]">
-                  {formatPeriodLabel(p)}
+                  <span className="inline-flex items-center gap-0.5">
+                    {formatPeriodLabel(p)}
+                    {onRemovePeriod && periods.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => onRemovePeriod(i)}
+                        className="ml-0.5 text-muted-foreground/50 hover:text-destructive transition-colors"
+                        aria-label={`Удалить период ${formatPeriodLabel(p)}`}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </span>
                 </th>
               ))}
               {metric.segmentTag && metric.rows.length > 1 && <th className="w-8" />}

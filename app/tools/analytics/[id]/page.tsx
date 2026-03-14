@@ -89,9 +89,11 @@ export default function DashboardEditorPage({ params }: PageProps) {
         <Button variant="outline" onClick={save}>
           Сохранить
         </Button>
-        <Button variant="outline" onClick={share}>
-          🔗 Поделиться
-        </Button>
+        {id !== "new" && (
+          <Button variant="outline" onClick={share}>
+            🔗 Поделиться
+          </Button>
+        )}
       </div>
 
       {/* Ошибка */}
@@ -124,6 +126,7 @@ export default function DashboardEditorPage({ params }: PageProps) {
                 periods={dashboard.periods}
                 onUpdate={updateMetric}
                 onRemove={() => removeMetric(metric.id)}
+                onRemovePeriod={removePeriod}
               />
             ))}
 
@@ -145,16 +148,6 @@ export default function DashboardEditorPage({ params }: PageProps) {
               <Button variant="outline" onClick={addPeriod}>
                 + Добавить период
               </Button>
-              {dashboard.periods.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-muted-foreground hover:text-destructive"
-                  onClick={() => removePeriod(dashboard.periods.length - 1)}
-                >
-                  − Убрать последний период
-                </Button>
-              )}
             </div>
 
             {/* Кнопка анализа */}
