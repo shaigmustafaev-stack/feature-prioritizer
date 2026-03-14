@@ -36,7 +36,7 @@ export function DashboardView({ metrics, periods, insights, analyzing }: Dashboa
       <div className="space-y-4">
         {metrics.map((metric) => (
           <ChartBlock key={metric.id} metric={metric} periods={periods}
-            insight={insights.find((ins) => ins.metricId === metric.id)?.text} analyzing={analyzing} />
+            insight={insights.find((ins) => ins.metricId === metric.id)} analyzing={analyzing} />
         ))}
       </div>
     </div>

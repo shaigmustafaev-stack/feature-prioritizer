@@ -7,7 +7,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer,
 } from "recharts"
-import type { ChartType, Metric, Period } from "../lib/types"
+import type { Metric, Period, Insight } from "../lib/types"
 import { pickChartType, formatMetricValue } from "../lib/utils"
 
 const COLORS = ["#6366f1", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6", "#ec4899", "#06b6d4", "#f97316"]
@@ -15,7 +15,7 @@ const COLORS = ["#6366f1", "#f59e0b", "#10b981", "#ef4444", "#8b5cf6", "#ec4899"
 interface ChartBlockProps {
   metric: Metric
   periods: Period[]
-  insight?: string
+  insight?: Insight
   analyzing?: boolean
 }
 
@@ -23,9 +23,6 @@ function formatPeriodLabel(p: Period): string {
   const date = new Date(p.year, p.month)
   return date.toLocaleDateString("ru-RU", { month: "short", year: "2-digit" })
 }
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-type _ChartType = ChartType // keep import used
 
 export function ChartBlock({ metric, periods, insight, analyzing }: ChartBlockProps) {
   const chartType = pickChartType(metric, periods.length)
@@ -111,8 +108,29 @@ export function ChartBlock({ metric, periods, insight, analyzing }: ChartBlockPr
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             Анализирую...
           </div>
-        ) : insight ? (
-          <p className="text-sm text-muted-foreground leading-relaxed">{insight}</p>
+        ) : insight?.summary ? (
+          <div className="space-y-2">
+            <p className="text-sm font-semibold">{insight.summary}</p>
+            {insight.detail && (
+              <p className="text-sm text-muted-foreground leading-relaxed">{insight.detail}</p>
+            )}
+            {insight.hypotheses && insight.hypotheses.length > 0 && (
+              <div className="space-y-1">
+                {insight.hypotheses.map((h, i) => (
+                  <div key={i} className="text-sm border-l-2 border-amber-400 pl-3 py-1 bg-amber-400/5 rounded-r">
+                    {h}
+                  </div>
+                ))}
+              </div>
+            )}
+            {insight.action && (
+              <div className="text-sm border-l-2 border-emerald-500 pl-3 py-1 bg-emerald-500/5 rounded-r font-medium">
+                Проверить: {insight.action}
+              </div>
+            )}
+          </div>
+        ) : insight?.text ? (
+          <p className="text-sm text-muted-foreground leading-relaxed">{insight.text}</p>
         ) : (
           <p className="text-sm text-muted-foreground italic">Нажмите «Анализировать» для получения AI-выводов</p>
         )}

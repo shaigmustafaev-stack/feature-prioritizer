@@ -53,7 +53,13 @@ export type ChartType = "line" | "bar" | "pie" | "horizontal-bar"
 
 export interface Insight {
   metricId: string
-  text: string
+  // Новые структурированные поля (optional для backward compat со старыми данными)
+  chartType?: "line" | "bar" | "pie"  // от AI, НЕ используется для рендера графиков
+  summary?: string       // 1 строка: главный факт с дельтой
+  detail?: string        // 3-5 предложений подробного анализа
+  hypotheses?: string[]  // 2-3 гипотезы от данных
+  action?: string        // что PM проверить первым делом
+  text?: string          // legacy fallback для старых дашбордов
 }
 
 export interface Dashboard {
