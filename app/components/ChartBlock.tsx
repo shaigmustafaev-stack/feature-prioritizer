@@ -31,16 +31,20 @@ export function ChartBlock({ metric, periods, insight, analyzing }: ChartBlockPr
   const chartType = pickChartType(metric, periods.length)
   const periodLabels = periods.map(formatPeriodLabel)
 
+  // Дедупликация ключей: если несколько строк без label, добавляем индекс
+  const rowKeys = metric.rows.map((r, i) => {
+    const base = r.label || metric.name
+    const duplicateBefore = metric.rows.slice(0, i).filter((prev) => (prev.label || metric.name) === base).length
+    return duplicateBefore > 0 ? `${base} (${duplicateBefore + 1})` : base
+  })
+
   const data = periodLabels.map((label, i) => {
     const point: Record<string, string | number> = { period: label }
-    metric.rows.forEach((row) => {
-      const key = row.label || metric.name
-      point[key] = row.values[i] ?? 0
+    metric.rows.forEach((row, ri) => {
+      point[rowKeys[ri]] = row.values[i] ?? 0
     })
     return point
   })
-
-  const rowKeys = metric.rows.map((r) => r.label || metric.name)
 
   return (
     <div className="rounded-xl border bg-card p-4 space-y-3">

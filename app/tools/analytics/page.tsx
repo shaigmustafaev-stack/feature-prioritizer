@@ -64,11 +64,14 @@ export default function AnalyticsListPage() {
 
   // ── Удалить дашборд ───────────────────────────────────────────────────────
   const handleDelete = async (id: string) => {
+    if (!confirm("Удалить этот дашборд? Действие нельзя отменить.")) return;
     const prev = dashboards;
     setDashboards((d) => d.filter((db) => db.id !== id));
     try {
-      const res = await fetch(`/api/analytics/dashboards/${id}`, {
+      const res = await fetch("/api/analytics/dashboards", {
         method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
       });
       if (!res.ok) throw new Error("Не удалось удалить дашборд");
     } catch (e) {

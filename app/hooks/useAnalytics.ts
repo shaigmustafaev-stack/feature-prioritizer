@@ -229,6 +229,8 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
     setAnalyzing(true);
     setError(null);
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30_000);
       const res = await fetch("/api/analytics/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -237,7 +239,9 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
           metrics: dashboard.metrics,
           periods: dashboard.periods,
         }),
+        signal: controller.signal,
       });
+      clearTimeout(timeout);
       if (!res.ok) throw new Error("Не удалось сгенерировать аналитику");
       const { insights } = await res.json();
 
@@ -269,7 +273,11 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
 
       setActiveTab("dashboard");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Ошибка анализа");
+      if (e instanceof DOMException && e.name === "AbortError") {
+        setError("AI-анализ не ответил за 30 секунд. Попробуйте ещё раз.");
+      } else {
+        setError(e instanceof Error ? e.message : "Ошибка анализа");
+      }
     } finally {
       setAnalyzing(false);
     }
