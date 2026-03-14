@@ -65,9 +65,11 @@ export async function POST(request: NextRequest) {
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
   let aiResponse: Response;
+  let provider: "openrouter" | "gemini" | "anthropic";
   try {
     if (openrouterKey) {
-      // OpenRouter API (OpenAI-совместимый, бесплатные модели, без региональных ограничений)
+      provider = "openrouter";
+      const model = process.env.OPENROUTER_MODEL || "google/gemini-2.0-flash-exp:free";
       aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -75,14 +77,14 @@ export async function POST(request: NextRequest) {
           Authorization: `Bearer ${openrouterKey}`,
         },
         body: JSON.stringify({
-          model: "openrouter/free",
+          model,
           messages: [{ role: "user", content: prompt }],
           temperature: 0.7,
           max_tokens: 4096,
         }),
       });
     } else if (geminiKey) {
-      // Google Gemini API (напрямую)
+      provider = "gemini";
       aiResponse = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
         {
@@ -98,7 +100,7 @@ export async function POST(request: NextRequest) {
         }
       );
     } else if (anthropicKey) {
-      // Claude API (fallback)
+      provider = "anthropic";
       aiResponse = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
@@ -132,12 +134,11 @@ export async function POST(request: NextRequest) {
 
   const aiData = await aiResponse.json();
 
-  // Извлекаем текст в зависимости от API
+  // Извлекаем текст в зависимости от использованного провайдера
   let rawText: string;
-  if (openrouterKey) {
-    // OpenAI-совместимый формат
+  if (provider === "openrouter") {
     rawText = aiData?.choices?.[0]?.message?.content ?? "";
-  } else if (geminiKey) {
+  } else if (provider === "gemini") {
     rawText = aiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
   } else {
     rawText = aiData?.content?.[0]?.text ?? "";
