@@ -77,17 +77,37 @@ export async function POST(request: NextRequest) {
 
 Без markdown, без \`\`\`, только JSON массив.`;
 
-  // Приоритет: OpenRouter → Groq → Gemini → Claude
-  const openrouterKey = process.env.OPENROUTER_API_KEY;
+  // Приоритет: Groq → OpenRouter → Gemini → Claude
   const groqKey = process.env.GROQ_API_KEY;
+  const openrouterKey = process.env.OPENROUTER_API_KEY;
   const geminiKey = process.env.GEMINI_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
   let aiResponse: Response | null = null;
-  let provider: "openrouter" | "groq" | "gemini" | "anthropic" = "openrouter";
+  let provider: "groq" | "openrouter" | "gemini" | "anthropic" = "groq";
   try {
-    // 1. OpenRouter — пробуем модели по очереди (бесплатные часто 404/429)
-    if (openrouterKey) {
+    // 1. Groq — бесплатный, быстрый, стабильный (30 RPM)
+    if (groqKey) {
+      provider = "groq";
+      const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${groqKey}`,
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.7,
+          max_tokens: 4096,
+        }),
+      });
+      if (groqRes.ok) { aiResponse = groqRes; }
+      else if (groqRes.status !== 429) { aiResponse = groqRes; }
+    }
+
+    // 2. OpenRouter — пробуем модели по очереди (бесплатные часто 404/429)
+    if (!aiResponse && openrouterKey) {
       provider = "openrouter";
       const models = (process.env.OPENROUTER_MODEL || "google/gemma-3-27b-it:free,mistralai/mistral-small-3.1-24b-instruct:free,google/gemma-3-12b-it:free,google/gemma-3-4b-it:free")
         .split(",")
@@ -112,27 +132,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Groq — бесплатный, быстрый, стабильный (30 RPM)
-    if (!aiResponse && groqKey) {
-      provider = "groq";
-      const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${groqKey}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.3-70b-versatile",
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.7,
-          max_tokens: 4096,
-        }),
-      });
-      if (groqRes.ok) { aiResponse = groqRes; }
-      else if (groqRes.status !== 429) { aiResponse = groqRes; }
-    }
-
-    // 3. Gemini — fallback если OpenRouter и Groq не сработали
+    // 3. Gemini — fallback
     if (!aiResponse && geminiKey) {
       provider = "gemini";
       const geminiRes = await fetch(
