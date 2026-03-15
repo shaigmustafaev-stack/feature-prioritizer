@@ -82,26 +82,37 @@ export async function POST(request: NextRequest) {
   const geminiKey = process.env.GEMINI_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
-  let aiResponse: Response;
-  let provider: "openrouter" | "gemini" | "anthropic";
+  let aiResponse: Response | null = null;
+  let provider: "openrouter" | "gemini" | "anthropic" = "openrouter";
   try {
+    // 1. OpenRouter — пробуем модели по очереди (бесплатные часто 404/429)
     if (openrouterKey) {
       provider = "openrouter";
-      const model = process.env.OPENROUTER_MODEL || "google/gemini-2.0-flash-exp:free";
-      aiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${openrouterKey}`,
-        },
-        body: JSON.stringify({
-          model,
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.7,
-          max_tokens: 4096,
-        }),
-      });
-    } else if (geminiKey) {
+      const models = (process.env.OPENROUTER_MODEL || "google/gemma-3-27b-it:free,mistralai/mistral-small-3.1-24b-instruct:free")
+        .split(",")
+        .map((m) => m.trim());
+      for (const model of models) {
+        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${openrouterKey}`,
+          },
+          body: JSON.stringify({
+            model,
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.7,
+            max_tokens: 4096,
+          }),
+        });
+        if (res.ok) { aiResponse = res; break; }
+        // 404 = модель удалена, 429 = rate limit → пробуем следующую
+        if (res.status !== 404 && res.status !== 429) { aiResponse = res; break; }
+      }
+    }
+
+    // 2. Gemini — fallback если OpenRouter не сработал
+    if (!aiResponse && geminiKey) {
       provider = "gemini";
       aiResponse = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
@@ -110,14 +121,14 @@ export async function POST(request: NextRequest) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 4096,
-            },
+            generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
           }),
         }
       );
-    } else if (anthropicKey) {
+    }
+
+    // 3. Anthropic — последний fallback
+    if (!aiResponse && anthropicKey) {
       provider = "anthropic";
       aiResponse = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
@@ -132,7 +143,9 @@ export async function POST(request: NextRequest) {
           messages: [{ role: "user", content: prompt }],
         }),
       });
-    } else {
+    }
+
+    if (!aiResponse) {
       return NextResponse.json(
         { error: "AI API ключ не настроен. Добавьте OPENROUTER_API_KEY, GEMINI_API_KEY или ANTHROPIC_API_KEY в .env.local" },
         { status: 500 }
