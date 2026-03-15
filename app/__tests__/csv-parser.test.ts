@@ -83,4 +83,37 @@ describe("parseCSVToMetrics", () => {
     expect(result!.periods[0].label).toBe("1")
     expect(result!.periods[1].label).toBe("2")
   })
+
+  it("handles CSV with metadata/filter rows at the top (Bitrix24 export)", () => {
+    // Симуляция CSV из Bitrix24: первые строки — фильтры, потом заголовок, потом данные
+    const filterHeader = "Примененные фильтры: start of month 01.12.2025 - 28.02.2026"
+    const data = [
+      { [filterHeader]: "", "": "", "__1": "", "__2": "" },
+      { [filterHeader]: "start of month", "": "Все пользователи продукта", "__1": "Все пользователи инструмента", "__2": "Активные пользователи" },
+      { [filterHeader]: "12/1/2025", "": "2090", "__1": "1525", "__2": "805328" },
+      { [filterHeader]: "1/1/2026", "": "2052", "__1": "1514", "__2": "789696" },
+      { [filterHeader]: "2/1/2026", "": "2169", "__1": "1587", "__2": "844428" },
+    ]
+    const result = parseCSVToMetrics(data)
+    expect(result).not.toBeNull()
+    expect(result!.periods).toHaveLength(3)
+    expect(result!.periods[0].label).toBe("12/1/2025")
+    expect(result!.metrics.length).toBeGreaterThanOrEqual(1)
+    // Числовые значения должны быть распознаны
+    const firstMetric = result!.metrics[0]
+    expect(firstMetric.rows[0].values[0]).toBeGreaterThan(0)
+  })
+
+  it("filters empty text parts from labels (no trailing separator)", () => {
+    const data = [
+      { metric: "DAU", segment: "", jan: 100, feb: 200 },
+      { metric: "Revenue", segment: "", jan: 500, feb: 600 },
+    ]
+    const result = parseCSVToMetrics(data)
+    expect(result).not.toBeNull()
+    expect(result!.periods[0].label).toBe("DAU")
+    expect(result!.periods[1].label).toBe("Revenue")
+    // Не должно быть "DAU · " с trailing separator
+    expect(result!.periods[0].label).not.toContain("·")
+  })
 })
