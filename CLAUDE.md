@@ -129,7 +129,7 @@ supabase/migrations/             # SQL-миграции (dashboards table, RLS p
 4. **API routes**: все PUT/DELETE принимают `id` в body (не в URL), т.к. Next.js App Router route handler = один файл `route.ts`
 
 ### AI API (generate route)
-Приоритет провайдеров: `OPENROUTER_API_KEY` → `GEMINI_API_KEY` → `ANTHROPIC_API_KEY`. Rate limit: 1 запрос / 30 сек на пользователя (in-memory Map). Timeout на клиенте: 30 сек через AbortController.
+Приоритет провайдеров: `OPENROUTER_API_KEY` → `GROQ_API_KEY` → `GEMINI_API_KEY` → `ANTHROPIC_API_KEY`. Rate limit: 1 запрос / 30 сек на пользователя (in-memory Map). Timeout на клиенте: 30 сек через AbortController.
 
 ## Правила кода
 - **Язык:** интерфейс и комментарии — на русском; коммиты — формат `type(scope): описание`, тип английский (`feat`/`fix`/`test`/`docs`/`refactor`/`chore`), описание русский

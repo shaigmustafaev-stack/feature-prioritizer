@@ -77,13 +77,14 @@ export async function POST(request: NextRequest) {
 
 Без markdown, без \`\`\`, только JSON массив.`;
 
-  // Приоритет: OpenRouter → Gemini → Claude
+  // Приоритет: OpenRouter → Groq → Gemini → Claude
   const openrouterKey = process.env.OPENROUTER_API_KEY;
+  const groqKey = process.env.GROQ_API_KEY;
   const geminiKey = process.env.GEMINI_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
   let aiResponse: Response | null = null;
-  let provider: "openrouter" | "gemini" | "anthropic" = "openrouter";
+  let provider: "openrouter" | "groq" | "gemini" | "anthropic" = "openrouter";
   try {
     // 1. OpenRouter — пробуем модели по очереди (бесплатные часто 404/429)
     if (openrouterKey) {
@@ -111,7 +112,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 2. Gemini — fallback если OpenRouter не сработал
+    // 2. Groq — бесплатный, быстрый, стабильный (30 RPM)
+    if (!aiResponse && groqKey) {
+      provider = "groq";
+      const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${groqKey}`,
+        },
+        body: JSON.stringify({
+          model: "llama-3.3-70b-versatile",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.7,
+          max_tokens: 4096,
+        }),
+      });
+      if (groqRes.ok) { aiResponse = groqRes; }
+      else if (groqRes.status !== 429) { aiResponse = groqRes; }
+    }
+
+    // 3. Gemini — fallback если OpenRouter и Groq не сработали
     if (!aiResponse && geminiKey) {
       provider = "gemini";
       const geminiRes = await fetch(
@@ -130,7 +151,7 @@ export async function POST(request: NextRequest) {
       else if (geminiRes.status !== 429) { aiResponse = geminiRes; }
     }
 
-    // 3. Anthropic — последний fallback
+    // 4. Anthropic — последний fallback
     if (!aiResponse && anthropicKey) {
       provider = "anthropic";
       aiResponse = await fetch("https://api.anthropic.com/v1/messages", {
@@ -150,7 +171,7 @@ export async function POST(request: NextRequest) {
 
     if (!aiResponse) {
       return NextResponse.json(
-        { error: "AI API ключ не настроен. Добавьте OPENROUTER_API_KEY, GEMINI_API_KEY или ANTHROPIC_API_KEY в .env.local" },
+        { error: "AI API ключ не настроен. Добавьте GROQ_API_KEY, OPENROUTER_API_KEY, GEMINI_API_KEY или ANTHROPIC_API_KEY в .env.local" },
         { status: 500 }
       );
     }
@@ -170,7 +191,7 @@ export async function POST(request: NextRequest) {
 
   // Извлекаем текст в зависимости от использованного провайдера
   let rawText: string;
-  if (provider === "openrouter") {
+  if (provider === "openrouter" || provider === "groq") {
     rawText = aiData?.choices?.[0]?.message?.content ?? "";
   } else if (provider === "gemini") {
     rawText = aiData?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
