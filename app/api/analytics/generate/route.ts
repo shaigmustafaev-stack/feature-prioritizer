@@ -88,7 +88,7 @@ export async function POST(request: NextRequest) {
     // 1. OpenRouter — пробуем модели по очереди (бесплатные часто 404/429)
     if (openrouterKey) {
       provider = "openrouter";
-      const models = (process.env.OPENROUTER_MODEL || "google/gemma-3-27b-it:free,mistralai/mistral-small-3.1-24b-instruct:free")
+      const models = (process.env.OPENROUTER_MODEL || "google/gemma-3-27b-it:free,mistralai/mistral-small-3.1-24b-instruct:free,google/gemma-3-12b-it:free,google/gemma-3-4b-it:free")
         .split(",")
         .map((m) => m.trim());
       for (const model of models) {
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
     // 2. Gemini — fallback если OpenRouter не сработал
     if (!aiResponse && geminiKey) {
       provider = "gemini";
-      aiResponse = await fetch(
+      const geminiRes = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
         {
           method: "POST",
@@ -125,6 +125,9 @@ export async function POST(request: NextRequest) {
           }),
         }
       );
+      // 429 = квота исчерпана → перейти к следующему провайдеру
+      if (geminiRes.ok) { aiResponse = geminiRes; }
+      else if (geminiRes.status !== 429) { aiResponse = geminiRes; }
     }
 
     // 3. Anthropic — последний fallback
