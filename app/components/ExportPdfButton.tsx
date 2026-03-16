@@ -23,7 +23,10 @@ export function ExportPdfButton({ dashboardRef, fileName }: ExportPdfButtonProps
         import("jspdf"),
       ])
 
-      const computedBg = getComputedStyle(el).backgroundColor || "#ffffff"
+      let computedBg = getComputedStyle(el).backgroundColor
+      if (!computedBg || computedBg === "transparent" || computedBg === "rgba(0, 0, 0, 0)") {
+        computedBg = "#ffffff"
+      }
 
       const canvas = await html2canvas(el, {
         scale: 2,
