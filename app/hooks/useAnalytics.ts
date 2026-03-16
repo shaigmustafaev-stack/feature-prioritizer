@@ -8,6 +8,15 @@ import { migratePeriod } from "../lib/utils";
 // Минимальный тип пользователя — не импортируем весь @supabase/supabase-js
 type AuthUser = { id: string; email?: string | null };
 
+/** Lightweight string hash for AI cache keys (djb2) */
+function hashString(str: string): string {
+  let hash = 5381;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) + hash + str.charCodeAt(i)) | 0;
+  }
+  return hash.toString(36);
+}
+
 // ─── Вспомогательные функции ──────────────────────────────────────────────────
 
 function createEmptyMetric(): Metric {
@@ -343,7 +352,7 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
     if (!dashboard) return;
 
     // Check AI cache
-    const cacheKey = JSON.stringify({ m: dashboard.metrics, p: dashboard.periods });
+    const cacheKey = hashString(JSON.stringify({ m: dashboard.metrics, p: dashboard.periods }));
     const cached = aiCacheRef.current.get(cacheKey);
     if (cached) {
       const summaryInsight: Insight | undefined = cached.dashboardSummary

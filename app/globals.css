@@ -94,6 +94,18 @@
   html {
     @apply font-sans;
   }
+  button,
+  [role="button"],
+  input,
+  select,
+  textarea {
+    min-height: 2.75rem;
+  }
+  /* Small inputs inside tables keep compact height */
+  table input,
+  table button {
+    min-height: auto;
+  }
 }
 
 /* Hide number input spinners */
