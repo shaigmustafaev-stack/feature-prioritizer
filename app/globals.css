@@ -16,8 +16,8 @@
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.25 0.02 265);
   --secondary-foreground: oklch(0.93 0.01 265);
-  --muted: oklch(0.25 0.02 265);
-  --muted-foreground: oklch(0.6 0.015 265);
+  --muted: oklch(0.22 0.02 265);
+  --muted-foreground: oklch(0.65 0.015 265);
   --accent: oklch(0.585 0.233 277);
   --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.58 0.22 27);
@@ -132,4 +132,38 @@ button:active:not(:disabled),
 [role="tab"]:active,
 [data-slot="select-trigger"]:active {
   transform: scale(0.97);
+}
+
+/* ─── Print CSS ─── */
+@media print {
+  /* Hide non-content elements */
+  nav,
+  [data-slot="tabs-list"],
+  button,
+  [role="button"],
+  .no-print {
+    display: none !important;
+  }
+
+  /* Reset backgrounds for printing */
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Remove shadows and unnecessary borders */
+  .rounded-xl {
+    box-shadow: none !important;
+  }
+
+  /* Prevent page breaks inside charts */
+  .rounded-xl.border {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Ensure charts are visible */
+  .recharts-wrapper {
+    page-break-inside: avoid;
+  }
 }

@@ -23,9 +23,8 @@ function NumericCell({ value, onChange }: { value: number; onChange: (val: strin
       }}
       onChange={(e) => {
         setDraft(e.target.value)
-        onChange(e.target.value)
       }}
-      onBlur={() => setEditing(false)}
+      onBlur={() => { onChange(draft); setEditing(false); }}
       className="h-7 text-sm text-center"
     />
   )

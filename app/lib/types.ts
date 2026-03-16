@@ -64,6 +64,9 @@ export interface Insight {
 export interface Dashboard {
   id: string
   name: string
+  description?: string
+  notes?: Record<string, string>
+  folder?: string
   periods: Period[]
   metrics: Metric[]
   insights: Insight[]
@@ -76,7 +79,7 @@ export interface Dashboard {
 export interface DashboardRow {
   id: string
   name: string
-  data: { periods: Period[]; metrics: Metric[]; insights: Insight[] }
+  data: { periods: Period[]; metrics: Metric[]; insights: Insight[]; description?: string; notes?: Record<string, string>; folder?: string }
   share_id: string | null
   user_id: string
   created_at: string

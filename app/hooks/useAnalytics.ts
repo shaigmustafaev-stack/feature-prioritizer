@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { toast } from "sonner";
 import type { Dashboard, DashboardRow, Metric, Period, Insight } from "../lib/types";
 import { migratePeriod } from "../lib/utils";
 
@@ -54,12 +55,30 @@ function normalizeDashboardRow(row: DashboardRow): Dashboard {
   return {
     id: row.id,
     name: row.name,
+    description: row.data?.description,
+    notes: row.data?.notes,
+    folder: row.data?.folder,
     periods: (row.data?.periods ?? []).map(migratePeriod),
     metrics: row.data?.metrics ?? [],
     insights: row.data?.insights ?? [],
     created_at: row.created_at,
     user_id: row.user_id,
     share_id: row.share_id ?? undefined,
+  };
+}
+
+function buildSavePayload(d: Dashboard) {
+  return {
+    id: d.id,
+    name: d.name,
+    data: {
+      periods: d.periods,
+      metrics: d.metrics,
+      insights: d.insights,
+      description: d.description,
+      notes: d.notes,
+      folder: d.folder,
+    },
   };
 }
 
@@ -76,6 +95,9 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
   // Ref для избежания stale closure в autoSave
   const dashboardRef = useRef<Dashboard | null>(null);
   const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // AI response cache (lives until page reload)
+  const aiCacheRef = useRef<Map<string, { insights: Insight[]; dashboardSummary?: string }>>(new Map());
 
   // ── Загрузка ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -132,21 +154,15 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
       const current = dashboardRef.current;
       if (!current || !user) return;
       try {
-        await fetch("/api/analytics/dashboards", {
+        const res = await fetch("/api/analytics/dashboards", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id: current.id,
-            name: current.name,
-            data: {
-              periods: current.periods,
-              metrics: current.metrics,
-              insights: current.insights,
-            },
-          }),
+          body: JSON.stringify(buildSavePayload(current)),
         });
+        if (!res.ok) throw new Error("PUT failed");
+        toast.success("Сохранено", { id: "auto-save", duration: 1500 });
       } catch {
-        // Тихая ошибка при авто-сохранении
+        toast.error("Ошибка сохранения", { id: "auto-save" });
       }
     }, 5000);
   }, [user]);
@@ -157,15 +173,7 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
     if (!current || !user) return;
     if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     // sendBeacon для надёжной отправки при закрытии вкладки
-    const payload = JSON.stringify({
-      id: current.id,
-      name: current.name,
-      data: {
-        periods: current.periods,
-        metrics: current.metrics,
-        insights: current.insights,
-      },
-    });
+    const payload = JSON.stringify(buildSavePayload(current));
     if (navigator.sendBeacon) {
       const blob = new Blob([payload], { type: "application/json" });
       navigator.sendBeacon("/api/analytics/dashboards?_method=PUT", blob);
@@ -333,6 +341,27 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
   const analyze = useCallback(async (): Promise<"needs-auth" | void> => {
     if (!user) return "needs-auth";
     if (!dashboard) return;
+
+    // Check AI cache
+    const cacheKey = JSON.stringify({ m: dashboard.metrics, p: dashboard.periods });
+    const cached = aiCacheRef.current.get(cacheKey);
+    if (cached) {
+      const summaryInsight: Insight | undefined = cached.dashboardSummary
+        ? { metricId: "__summary__", summary: cached.dashboardSummary }
+        : undefined;
+      const allInsights = summaryInsight
+        ? [summaryInsight, ...cached.insights]
+        : cached.insights;
+      setDashboard((prev) => {
+        if (!prev) return prev;
+        const next = { ...prev, insights: allInsights };
+        dashboardRef.current = next;
+        return next;
+      });
+      setActiveTab("dashboard");
+      return;
+    }
+
     setAnalyzing(true);
     setError(null);
     try {
@@ -350,12 +379,21 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
       });
       clearTimeout(timeout);
       if (!res.ok) throw new Error("Не удалось сгенерировать аналитику");
-      const { insights } = await res.json();
+      const { insights, dashboardSummary: summary } = await res.json();
+
+      // Cache the response
+      aiCacheRef.current.set(cacheKey, { insights, dashboardSummary: summary });
+
+      // Add summary as a special insight
+      const summaryInsight: Insight | undefined = summary
+        ? { metricId: "__summary__", summary }
+        : undefined;
+      const allInsights = summaryInsight ? [summaryInsight, ...insights] : insights;
 
       // Обновляем состояние и принудительно сохраняем
       setDashboard((prev) => {
         if (!prev) return prev;
-        const next = { ...prev, insights };
+        const next = { ...prev, insights: allInsights };
         dashboardRef.current = next;
         return next;
       });
@@ -366,15 +404,7 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
         await fetch("/api/analytics/dashboards", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id: current.id,
-            name: current.name,
-            data: {
-              periods: current.periods,
-              metrics: current.metrics,
-              insights,
-            },
-          }),
+          body: JSON.stringify(buildSavePayload({ ...current, insights: allInsights })),
         });
       }
 
@@ -399,21 +429,136 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
       const res = await fetch("/api/analytics/dashboards", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: current.id,
-          name: current.name,
-          data: {
-            periods: current.periods,
-            metrics: current.metrics,
-            insights: current.insights,
-          },
-        }),
+        body: JSON.stringify(buildSavePayload(current)),
       });
       if (!res.ok) throw new Error("Не удалось сохранить дашборд");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Ошибка сохранения");
     }
   }, [user]);
+
+  // ── Заметки к метрикам ───────────────────────────────────────────────────
+  const updateNote = useCallback(
+    (metricId: string, text: string) => {
+      setDashboard((prev) => {
+        if (!prev) return prev;
+        const notes = { ...(prev.notes ?? {}), [metricId]: text };
+        const next = { ...prev, notes };
+        dashboardRef.current = next;
+        return next;
+      });
+      triggerAutoSave();
+    },
+    [triggerAutoSave]
+  );
+
+  // ── Редактирование инсайтов ─────────────────────────────────────────────
+  const updateInsight = useCallback(
+    (metricId: string, updates: Partial<Insight>) => {
+      setDashboard((prev) => {
+        if (!prev) return prev;
+        const insights = prev.insights.map((ins) =>
+          ins.metricId === metricId ? { ...ins, ...updates } : ins
+        );
+        const next = { ...prev, insights };
+        dashboardRef.current = next;
+        return next;
+      });
+      triggerAutoSave();
+    },
+    [triggerAutoSave]
+  );
+
+  // ── Перестановка метрик ─────────────────────────────────────────────────
+  const reorderMetrics = useCallback(
+    (ids: string[]) => {
+      setDashboard((prev) => {
+        if (!prev) return prev;
+        const byId = new Map(prev.metrics.map((m) => [m.id, m]));
+        const metrics = ids.map((id) => byId.get(id)).filter(Boolean) as Metric[];
+        const next = { ...prev, metrics };
+        dashboardRef.current = next;
+        return next;
+      });
+      triggerAutoSave();
+    },
+    [triggerAutoSave]
+  );
+
+  // ── Шаблоны периодов ───────────────────────────────────────────────────
+  const addPeriodsFromTemplate = useCallback(
+    (template: "quarters" | "months-6" | "months-12") => {
+      setDashboard((prev) => {
+        if (!prev) return prev;
+        const now = new Date();
+        const year = now.getFullYear();
+        let labels: string[];
+        if (template === "quarters") {
+          labels = [`Q1 ${year}`, `Q2 ${year}`, `Q3 ${year}`, `Q4 ${year}`];
+        } else {
+          const count = template === "months-6" ? 6 : 12;
+          labels = [];
+          for (let i = 0; i < count; i++) {
+            const d = new Date(year, now.getMonth() + i, 1);
+            const dd = String(d.getDate()).padStart(2, "0");
+            const mm = String(d.getMonth() + 1).padStart(2, "0");
+            const yy = String(d.getFullYear()).slice(-2);
+            labels.push(`${dd}.${mm}.${yy}`);
+          }
+        }
+        const newPeriods = labels.map((label) => ({ label }));
+        const updatedMetrics = prev.metrics.map((m) => ({
+          ...m,
+          rows: m.rows.map((row) => ({
+            ...row,
+            values: [...row.values, ...newPeriods.map(() => 0)],
+          })),
+        }));
+        const next = {
+          ...prev,
+          periods: [...prev.periods, ...newPeriods],
+          metrics: updatedMetrics,
+        };
+        dashboardRef.current = next;
+        return next;
+      });
+      triggerAutoSave();
+    },
+    [triggerAutoSave]
+  );
+
+  // ── Отозвать ссылку ─────────────────────────────────────────────────────
+  const revokeShare = useCallback(async (): Promise<"needs-auth" | void> => {
+    if (!user) return "needs-auth";
+    const current = dashboardRef.current;
+    if (!current) return;
+    try {
+      const res = await fetch("/api/analytics/share", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: current.id }),
+      });
+      if (!res.ok) throw new Error("Не удалось отозвать ссылку");
+      setDashboard((prev) => {
+        if (!prev) return prev;
+        const next = { ...prev, share_id: undefined };
+        dashboardRef.current = next;
+        return next;
+      });
+      toast.success("Ссылка отозвана");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Ошибка отзыва ссылки");
+    }
+  }, [user]);
+
+  // ── Dashboard summary (memo для UI) ────────────────────────────────────
+  const dashboardSummary = useMemo(() => ({
+    metricsCount: dashboard?.metrics.length ?? 0,
+    periodsCount: dashboard?.periods.length ?? 0,
+    totalDataPoints: dashboard?.metrics.reduce(
+      (s, m) => s + m.rows.reduce((s2, r) => s2 + r.values.length, 0), 0
+    ) ?? 0,
+  }), [dashboard?.metrics, dashboard?.periods]);
 
   // ── Поделиться ────────────────────────────────────────────────────────────
   const share = useCallback(async (): Promise<"needs-auth" | void> => {
@@ -450,6 +595,7 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
     setActiveTab,
     shareModalId,
     setShareModalId,
+    dashboardSummary,
     updateDashboard,
     addMetric,
     removeMetric,
@@ -457,6 +603,11 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
     addPeriod,
     removePeriod,
     updatePeriod,
+    updateNote,
+    updateInsight,
+    reorderMetrics,
+    addPeriodsFromTemplate,
+    revokeShare,
     analyze,
     save,
     share,
