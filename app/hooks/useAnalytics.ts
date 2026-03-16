@@ -15,7 +15,10 @@ function createEmptyMetric(): Metric {
 
 function createDefaultPeriod(): Period {
   const now = new Date();
-  return { label: now.toLocaleDateString("ru-RU", { month: "short", year: "2-digit" }) };
+  const dd = String(now.getDate()).padStart(2, '0');
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const yy = String(now.getFullYear()).slice(-2);
+  return { label: `${dd}.${mm}.${yy}` };
 }
 
 /** Парсит краткий месяц-год ("янв. 25") и возвращает следующий месяц в том же формате.
@@ -28,7 +31,10 @@ function parseAndAdvanceMonth(label: string, periodIndex: number): string {
     // Не удалось распарсить — fallback: текущий месяц + смещение на номер периода
     const now = new Date();
     now.setMonth(now.getMonth() + periodIndex);
-    return now.toLocaleDateString("ru-RU", { month: "short", year: "2-digit" });
+    const dd2 = String(now.getDate()).padStart(2, '0');
+    const mm2 = String(now.getMonth() + 1).padStart(2, '0');
+    const yy2 = String(now.getFullYear()).slice(-2);
+    return `${dd2}.${mm2}.${yy2}`;
   }
   const yearMatch = lower.match(/(\d{2,4})$/);
   let year = yearMatch ? parseInt(yearMatch[1], 10) : new Date().getFullYear() % 100;
@@ -38,7 +44,10 @@ function parseAndAdvanceMonth(label: string, periodIndex: number): string {
     year += 1;
   }
   const d = new Date(2000 + (year < 100 ? year : year - 2000), nextMonth, 1);
-  return d.toLocaleDateString("ru-RU", { month: "short", year: "2-digit" });
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yy = String(d.getFullYear()).slice(-2);
+  return `${dd}.${mm}.${yy}`;
 }
 
 function normalizeDashboardRow(row: DashboardRow): Dashboard {
@@ -141,6 +150,47 @@ export function useAnalytics(dashboardId: string, user: AuthUser | null) {
       }
     }, 5000);
   }, [user]);
+
+  // ── Немедленное сохранение (flush) при уходе со страницы ─────────────────
+  const flushSave = useCallback(() => {
+    const current = dashboardRef.current;
+    if (!current || !user) return;
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    // sendBeacon для надёжной отправки при закрытии вкладки
+    const payload = JSON.stringify({
+      id: current.id,
+      name: current.name,
+      data: {
+        periods: current.periods,
+        metrics: current.metrics,
+        insights: current.insights,
+      },
+    });
+    if (navigator.sendBeacon) {
+      const blob = new Blob([payload], { type: "application/json" });
+      navigator.sendBeacon("/api/analytics/dashboards?_method=PUT", blob);
+    } else {
+      fetch("/api/analytics/dashboards", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+        keepalive: true,
+      }).catch(() => {});
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") flushSave();
+    };
+    const onBeforeUnload = () => flushSave();
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("beforeunload", onBeforeUnload);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  }, [flushSave]);
 
   // ── Обновить весь дашборд ─────────────────────────────────────────────────
   const updateDashboard = useCallback(

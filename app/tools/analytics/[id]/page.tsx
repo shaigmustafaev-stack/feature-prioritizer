@@ -9,6 +9,7 @@ import { DashboardView } from "../../../components/DashboardView";
 import { ShareModal } from "../../../components/ShareModal";
 import { AuthGateDialog } from "../../../components/AuthGateDialog";
 import { CsvUploadButton } from "../../../components/CsvUploadButton";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -95,6 +96,14 @@ export default function DashboardEditorPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-[860px] px-4 py-8">
+      {/* Кнопка назад */}
+      <Link
+        href="/tools/analytics"
+        className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4"
+      >
+        ← Назад к дашбордам
+      </Link>
+
       {/* Заголовок с редактируемым именем */}
       <div className="mb-6 flex items-center gap-3 flex-wrap">
         <Input
@@ -128,9 +137,15 @@ export default function DashboardEditorPage({ params }: PageProps) {
           if (v) setActiveTab(v as "data" | "dashboard");
         }}
       >
-        <TabsList className="mb-6">
-          <TabsTrigger value="data">Данные</TabsTrigger>
-          <TabsTrigger value="dashboard">Дашборд</TabsTrigger>
+        <TabsList className="mb-6 h-11 p-1">
+          <TabsTrigger value="data" className="gap-2 px-4 text-sm font-medium">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-4"><path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+            Данные
+          </TabsTrigger>
+          <TabsTrigger value="dashboard" className="gap-2 px-4 text-sm font-medium">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-4"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 4-6"/></svg>
+            Дашборд
+          </TabsTrigger>
         </TabsList>
 
         {/* ── Вкладка: Данные ──────────────────────────────────────────────── */}

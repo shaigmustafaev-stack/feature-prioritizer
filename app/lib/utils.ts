@@ -92,9 +92,15 @@ export const formatMetricValue = (value: number): string => {
   return String(value)
 }
 
+export const formatExactValue = (value: number): string => {
+  return new Intl.NumberFormat('ru-RU', { useGrouping: true }).format(value)
+}
+
 export function migratePeriod(p: { month?: number; year?: number; label?: string }): Period {
   if (p.label) return { label: p.label }
-  return {
-    label: new Date(p.year!, p.month!).toLocaleDateString("ru-RU", { month: "short", year: "2-digit" })
-  }
+  const d = new Date(p.year!, p.month!)
+  const dd = String(d.getDate()).padStart(2, '0')
+  const mm = String(d.getMonth() + 1).padStart(2, '0')
+  const yy = String(d.getFullYear()).slice(-2)
+  return { label: `${dd}.${mm}.${yy}` }
 }
