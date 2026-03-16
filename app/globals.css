@@ -101,9 +101,16 @@
   textarea {
     min-height: 2.75rem;
   }
-  /* Small inputs inside tables keep compact height */
+  /* Compact height inside cards, tables, tabs, and dropdowns */
+  .bg-card input,
+  .bg-card select,
+  .bg-card button,
   table input,
-  table button {
+  table button,
+  [data-slot="tabs-trigger"],
+  [data-slot="tabs-list"] button,
+  [data-slot="select-trigger"],
+  [data-slot="dropdown-menu-trigger"] {
     min-height: auto;
   }
 }

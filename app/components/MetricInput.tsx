@@ -124,7 +124,7 @@ export function MetricInput({ metric, periods, onUpdate, onRemove, onRemovePerio
 
       {/* Values table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm border-collapse min-w-[600px]">
+        <table className="w-full text-sm border-collapse">
           <thead>
             <tr>
               {metric.segmentTag && <th className="text-left pr-2 py-1 text-muted-foreground font-medium min-w-[100px]">Сегмент</th>}

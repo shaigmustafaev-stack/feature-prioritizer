@@ -29,15 +29,15 @@ function SortableMetric({ metric, ...props }: { metric: Metric } & Omit<React.Co
   };
 
   return (
-    <div ref={setNodeRef} style={style} className="relative">
-      <div {...attributes} {...listeners} className="absolute left-0 top-0 bottom-0 w-8 flex items-center justify-center cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground z-10" aria-label="Перетащить">
+    <div ref={setNodeRef} style={style} className="flex items-start gap-1">
+      <div {...attributes} {...listeners} className="mt-5 flex-shrink-0 w-6 flex items-center justify-center cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground" aria-label="Перетащить">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="size-4">
           <circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/>
           <circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/>
           <circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/>
         </svg>
       </div>
-      <div className="pl-8">
+      <div className="flex-1 min-w-0">
         <MetricInput metric={metric} {...props} />
       </div>
     </div>
@@ -208,7 +208,7 @@ export default function DashboardEditorPage({ params }: PageProps) {
           if (v) setActiveTab(v as "data" | "dashboard");
         }}
       >
-        <TabsList className="mb-6 h-11 p-1">
+        <TabsList className="mb-6">
           <TabsTrigger value="data" className="gap-2 px-4 text-sm font-medium">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-4"><path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
             Данные
