@@ -57,6 +57,7 @@ export default async function SharePage({ params }: PageProps) {
         metrics={row.data?.metrics ?? []}
         periods={(row.data?.periods ?? []).map(migratePeriod)}
         insights={row.data?.insights ?? []}
+        notes={row.data?.notes ?? {}}
       />
     </div>
   );

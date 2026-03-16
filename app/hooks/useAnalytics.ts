@@ -64,9 +64,9 @@ function normalizeDashboardRow(row: DashboardRow): Dashboard {
   return {
     id: row.id,
     name: row.name,
-    description: row.data?.description,
-    notes: row.data?.notes,
-    folder: row.data?.folder,
+    description: row.data?.description ?? "",
+    notes: row.data?.notes ?? {},
+    folder: row.data?.folder ?? "",
     periods: (row.data?.periods ?? []).map(migratePeriod),
     metrics: row.data?.metrics ?? [],
     insights: row.data?.insights ?? [],
