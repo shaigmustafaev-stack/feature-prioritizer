@@ -23,8 +23,9 @@ function NumericCell({ value, onChange }: { value: number; onChange: (val: strin
       }}
       onChange={(e) => {
         setDraft(e.target.value)
+        onChange(e.target.value)
       }}
-      onBlur={() => { onChange(draft); setEditing(false); }}
+      onBlur={() => setEditing(false)}
       className="h-7 text-sm text-center"
     />
   )
@@ -32,7 +33,9 @@ function NumericCell({ value, onChange }: { value: number; onChange: (val: strin
 
 const SEGMENT_PRESETS = [
   { value: "", label: "Без разреза" },
-  { value: "по сегментам", label: "По сегментам" },
+  { value: "по платформам", label: "По платформам" },
+  { value: "по тарифам", label: "По тарифам" },
+  { value: "по зонам", label: "По зонам" },
 ]
 
 interface MetricInputProps {
@@ -136,7 +139,7 @@ export function MetricInput({ metric, periods, onUpdate, onRemove, onRemovePerio
                         type="text"
                         value={formatPeriodLabel(p)}
                         onChange={(e) => onUpdatePeriod(i, e.target.value)}
-                        className="w-full text-center text-sm font-medium text-muted-foreground bg-muted/50 border border-border rounded px-1.5 py-0.5 outline-none hover:bg-muted hover:border-foreground/20 focus:text-foreground focus:ring-1 focus:ring-ring focus:bg-background transition-colors"
+                        className="w-full bg-transparent text-center text-sm font-medium text-muted-foreground outline-none focus:text-foreground focus:ring-1 focus:ring-ring rounded px-1"
                         aria-label={`Название периода ${i + 1}`}
                       />
                     ) : (

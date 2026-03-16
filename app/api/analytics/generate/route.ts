@@ -49,18 +49,15 @@ export async function POST(request: NextRequest) {
 - Не придумывай причины — давай ГИПОТЕЗЫ для проверки
 - Сравнивай метрики МЕЖДУ СОБОЙ — ищи корреляции
 
-## Формат ответа — СТРОГО JSON объект:
-{
-  "dashboardSummary": "<2-3 предложения: общий вывод по всем метрикам, ключевые тренды и связи>",
-  "insights": [{
-    "metricId": "<id>",
-    "chartType": "line | bar | pie",
-    "summary": "<1 строка: главный факт с цифрами и дельтой>",
-    "detail": "<подробный анализ 3-5 предложений>",
-    "hypotheses": ["<гипотеза от данных>", "<гипотеза от данных>"],
-    "action": "<что конкретно проверить или сделать>"
-  }]
-}
+## Формат ответа — СТРОГО JSON массив:
+[{
+  "metricId": "<id>",
+  "chartType": "line | bar | pie",
+  "summary": "<1 строка: главный факт с цифрами и дельтой>",
+  "detail": "<подробный анализ 3-5 предложений>",
+  "hypotheses": ["<гипотеза от данных>", "<гипотеза от данных>"],
+  "action": "<что конкретно проверить или сделать>"
+}]
 
 ## Правила chartType:
 - line: данные по времени (тренд за периоды)
@@ -74,7 +71,6 @@ export async function POST(request: NextRequest) {
 4. АНОМАЛИИ: резкие скачки или провалы — выдели отдельно
 5. ГИПОТЕЗЫ: 2-3 версии ОТ ДАННЫХ, не generic. Плохо: "возможно сезонность". Хорошо: "Android падает на 5.6% при росте iOS — проблема специфична для Android"
 6. ДЕЙСТВИЕ: что PM должен проверить первым делом
-7. ФОРМАТИРОВАНИЕ ЧИСЕЛ: все числа в ответе форматируй с разделителями тысяч через пробел (например: 789 696, не 789696; 1 530 000, не 1530000)
 
 Метрики: ${JSON.stringify(metrics)}
 Периоды: ${periodLabels}
@@ -207,16 +203,8 @@ export async function POST(request: NextRequest) {
   rawText = rawText.replace(/^```json\s*/i, "").replace(/\s*```$/i, "").trim();
 
   let insights: Insight[];
-  let dashboardSummary: string | undefined;
   try {
-    const parsed = JSON.parse(rawText);
-    // Support both new object format { dashboardSummary, insights } and legacy array format
-    if (Array.isArray(parsed)) {
-      insights = parsed as Insight[];
-    } else {
-      dashboardSummary = parsed.dashboardSummary;
-      insights = (parsed.insights ?? []) as Insight[];
-    }
+    insights = JSON.parse(rawText) as Insight[];
   } catch {
     return NextResponse.json(
       { error: "Не удалось разобрать ответ AI как JSON", raw: rawText },
@@ -227,5 +215,5 @@ export async function POST(request: NextRequest) {
   // Record successful request timestamp
   rateLimitMap.set(user.id, now);
 
-  return NextResponse.json({ insights, dashboardSummary });
+  return NextResponse.json({ insights });
 }

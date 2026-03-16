@@ -53,22 +53,3 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({ shareId });
 }
-
-export async function DELETE(request: NextRequest) {
-  const supabase = await supabaseServer();
-  const user = await getAuthUser(supabase);
-  if (!user) return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
-
-  const body = await request.json();
-  const { id } = body as { id: string };
-  if (!id) return NextResponse.json({ error: "id обязателен" }, { status: 400 });
-
-  const { error } = await supabase
-    .from("dashboards")
-    .update({ share_id: null })
-    .eq("id", id)
-    .eq("user_id", user.id);
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ success: true });
-}

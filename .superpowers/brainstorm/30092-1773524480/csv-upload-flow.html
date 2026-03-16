@@ -1,0 +1,180 @@
+<h2>CSV Upload — маппинг столбцов</h2>
+<p class="subtitle">Юзер загружает файл → видит превью → маппит столбцы → импорт</p>
+
+<div class="section">
+  <h3>Шаг 1: Загрузка файла</h3>
+  <div class="mockup">
+    <div class="mockup-header">Вкладка "Данные" — кнопка рядом с "+ Добавить метрику"</div>
+    <div class="mockup-body" style="padding: 24px; text-align: center;">
+      <div style="border: 2px dashed #555; border-radius: 12px; padding: 32px; margin: 0 auto; max-width: 500px;">
+        <div style="font-size: 32px; margin-bottom: 8px;">📄</div>
+        <div style="font-weight: 600; margin-bottom: 4px;">Перетащите CSV или нажмите для выбора</div>
+        <div style="font-size: 13px; color: #888;">Поддерживается любая структура — вы сами укажете что есть что</div>
+        <div style="margin-top: 16px;">
+          <button class="mock-button" style="padding: 8px 20px;">Выбрать файл</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Шаг 2: Превью + маппинг столбцов</h3>
+  <div class="mockup">
+    <div class="mockup-header">Модалка после загрузки файла "Всего отправлено.csv"</div>
+    <div class="mockup-body" style="padding: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          <div style="font-weight: 600; font-size: 15px;">📄 Всего отправлено.csv</div>
+          <div style="font-size: 12px; color: #888;">133 строки · 4 столбца</div>
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span style="font-size: 12px; color: #888;">Агрегация:</span>
+          <select style="padding: 4px 8px; border-radius: 6px; border: 1px solid #555; background: #1a1a2e; color: #eee; font-size: 12px;">
+            <option>Сумма</option>
+            <option>Среднее</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="border-bottom: 1px solid #333;">
+              <th style="padding: 8px; text-align: left;">
+                <select style="width: 100%; padding: 4px; border-radius: 6px; border: 1px solid #6366f1; background: #6366f120; color: #a5b4fc; font-size: 12px; font-weight: 600;">
+                  <option selected>📅 Год</option>
+                  <option>📊 Значение</option>
+                  <option>🏷 Сегмент</option>
+                  <option>⊘ Пропустить</option>
+                </select>
+              </th>
+              <th style="padding: 8px; text-align: left;">
+                <select style="width: 100%; padding: 4px; border-radius: 6px; border: 1px solid #6366f1; background: #6366f120; color: #a5b4fc; font-size: 12px; font-weight: 600;">
+                  <option selected>📅 Месяц</option>
+                  <option>📊 Значение</option>
+                  <option>🏷 Сегмент</option>
+                  <option>⊘ Пропустить</option>
+                </select>
+              </th>
+              <th style="padding: 8px; text-align: left;">
+                <select style="width: 100%; padding: 4px; border-radius: 6px; border: 1px solid #888; background: #88888820; color: #888; font-size: 12px; font-weight: 600;">
+                  <option>📅 День</option>
+                  <option>📊 Значение</option>
+                  <option>🏷 Сегмент</option>
+                  <option selected>⊘ Пропустить</option>
+                </select>
+              </th>
+              <th style="padding: 8px; text-align: left;">
+                <select style="width: 100%; padding: 4px; border-radius: 6px; border: 1px solid #10b981; background: #10b98120; color: #6ee7b7; font-size: 12px; font-weight: 600;">
+                  <option>📅 Период</option>
+                  <option selected>📊 Значение</option>
+                  <option>🏷 Сегмент</option>
+                  <option>⊘ Пропустить</option>
+                </select>
+              </th>
+            </tr>
+            <tr style="border-bottom: 1px solid #333; color: #666; font-size: 11px;">
+              <th style="padding: 4px 8px; text-align: left; font-weight: 400;">Год</th>
+              <th style="padding: 4px 8px; text-align: left; font-weight: 400;">Месяц</th>
+              <th style="padding: 4px 8px; text-align: left; font-weight: 400; text-decoration: line-through;">День</th>
+              <th style="padding: 4px 8px; text-align: left; font-weight: 400;">Сумма hits</th>
+            </tr>
+          </thead>
+          <tbody style="color: #ccc;">
+            <tr style="border-bottom: 1px solid #222;"><td style="padding: 6px 8px;">2025</td><td style="padding: 6px 8px;">Ноябрь</td><td style="padding: 6px 8px; color: #555; text-decoration: line-through;">6</td><td style="padding: 6px 8px; color: #6ee7b7;">2 261</td></tr>
+            <tr style="border-bottom: 1px solid #222;"><td style="padding: 6px 8px;">2025</td><td style="padding: 6px 8px;">Ноябрь</td><td style="padding: 6px 8px; color: #555; text-decoration: line-through;">7</td><td style="padding: 6px 8px; color: #6ee7b7;">9 959</td></tr>
+            <tr style="border-bottom: 1px solid #222;"><td style="padding: 6px 8px;">2025</td><td style="padding: 6px 8px;">Ноябрь</td><td style="padding: 6px 8px; color: #555; text-decoration: line-through;">8</td><td style="padding: 6px 8px; color: #6ee7b7;">3 008</td></tr>
+            <tr style="border-bottom: 1px solid #222;"><td style="padding: 6px 8px;">2025</td><td style="padding: 6px 8px;">Декабрь</td><td style="padding: 6px 8px; color: #555; text-decoration: line-through;">1</td><td style="padding: 6px 8px; color: #6ee7b7;">27 535</td></tr>
+            <tr><td style="padding: 6px 8px;">2026</td><td style="padding: 6px 8px;">Январь</td><td style="padding: 6px 8px; color: #555; text-decoration: line-through;">1</td><td style="padding: 6px 8px; color: #6ee7b7;">2 120</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top: 16px; padding: 12px; background: #6366f110; border-radius: 8px; border: 1px solid #6366f130;">
+        <div style="font-size: 13px; font-weight: 600; color: #a5b4fc; margin-bottom: 4px;">Результат импорта:</div>
+        <div style="font-size: 12px; color: #888;">1 метрика «Сумма hits» · 5 периодов (ноя 25 — мар 26) · агрегация: сумма по месяцам</div>
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+        <button class="mock-button" style="padding: 8px 16px; background: transparent; border: 1px solid #555;">Отмена</button>
+        <button class="mock-button" style="padding: 8px 20px; background: #6366f1; border: none;">Импортировать</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Файл 2: категории без дат</h3>
+  <div class="mockup">
+    <div class="mockup-header">Тот же flow — "Кол-во упоминаний копилота.csv"</div>
+    <div class="mockup-body" style="padding: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          <div style="font-weight: 600; font-size: 15px;">📄 Кол-во упоминаний копилота.csv</div>
+          <div style="font-size: 12px; color: #888;">14 строк · 2 столбца</div>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="border-bottom: 1px solid #333;">
+              <th style="padding: 8px; text-align: left;">
+                <select style="width: 100%; padding: 4px; border-radius: 6px; border: 1px solid #f59e0b; background: #f59e0b20; color: #fcd34d; font-size: 12px; font-weight: 600;">
+                  <option>📅 Период</option>
+                  <option>📊 Значение</option>
+                  <option selected>🏷 Сегмент</option>
+                  <option>⊘ Пропустить</option>
+                </select>
+              </th>
+              <th style="padding: 8px; text-align: left;">
+                <select style="width: 100%; padding: 4px; border-radius: 6px; border: 1px solid #10b981; background: #10b98120; color: #6ee7b7; font-size: 12px; font-weight: 600;">
+                  <option>📅 Период</option>
+                  <option selected>📊 Значение</option>
+                  <option>🏷 Сегмент</option>
+                  <option>⊘ Пропустить</option>
+                </select>
+              </th>
+            </tr>
+            <tr style="border-bottom: 1px solid #333; color: #666; font-size: 11px;">
+              <th style="padding: 4px 8px; text-align: left; font-weight: 400;">p1</th>
+              <th style="padding: 4px 8px; text-align: left; font-weight: 400;">Сумма hits</th>
+            </tr>
+          </thead>
+          <tbody style="color: #ccc;">
+            <tr style="border-bottom: 1px solid #222;"><td style="padding: 6px 8px; color: #fcd34d;">chatType_chat</td><td style="padding: 6px 8px; color: #6ee7b7;">44 295</td></tr>
+            <tr style="border-bottom: 1px solid #222;"><td style="padding: 6px 8px; color: #fcd34d;">chatType_user</td><td style="padding: 6px 8px; color: #6ee7b7;">44 077</td></tr>
+            <tr style="border-bottom: 1px solid #222;"><td style="padding: 6px 8px; color: #fcd34d;">chatType_notes</td><td style="padding: 6px 8px; color: #6ee7b7;">7 126</td></tr>
+            <tr style="border-bottom: 1px solid #222;"><td style="padding: 6px 8px; color: #fcd34d;">chatType_sonetGroup</td><td style="padding: 6px 8px; color: #6ee7b7;">2 493</td></tr>
+            <tr><td style="padding: 6px 8px; color: #fcd34d;">chatType_calendar</td><td style="padding: 6px 8px; color: #6ee7b7;">1 818</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top: 16px; padding: 12px; background: #6366f110; border-radius: 8px; border: 1px solid #6366f130;">
+        <div style="font-size: 13px; font-weight: 600; color: #a5b4fc; margin-bottom: 4px;">Результат импорта:</div>
+        <div style="font-size: 12px; color: #888;">1 метрика «Сумма hits» · 14 сегментов · 1 период (текущий)</div>
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+        <button class="mock-button" style="padding: 8px 16px; background: transparent; border: 1px solid #555;">Отмена</button>
+        <button class="mock-button" style="padding: 8px 20px; background: #6366f1; border: none;">Импортировать</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Ошибка формата</h3>
+  <div class="mockup">
+    <div class="mockup-header">Если файл не CSV или не удалось распарсить</div>
+    <div class="mockup-body" style="padding: 20px; text-align: center;">
+      <div style="padding: 24px; background: #ef444420; border-radius: 8px; border: 1px solid #ef444440;">
+        <div style="font-size: 24px; margin-bottom: 8px;">⚠️</div>
+        <div style="font-weight: 600; color: #fca5a5; margin-bottom: 4px;">Не удалось прочитать файл</div>
+        <div style="font-size: 12px; color: #888;">Убедитесь что файл в формате CSV (разделитель — запятая или точка с запятой)</div>
+      </div>
+    </div>
+  </div>
+</div>

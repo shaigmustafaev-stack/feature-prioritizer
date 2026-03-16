@@ -1,0 +1,108 @@
+<h2>CSV Upload — простой flow</h2>
+<p class="subtitle">Загрузил → увидел что нашли → нажал ОК</p>
+
+<div class="section">
+  <h3>Кнопка на вкладке "Данные"</h3>
+  <div class="mockup">
+    <div class="mockup-header">Панель управления (рядом с "+ Добавить метрику")</div>
+    <div class="mockup-body" style="padding: 16px;">
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="mock-button" style="padding: 8px 16px; background: transparent; border: 1px solid #555;">+ Добавить метрику</button>
+        <button class="mock-button" style="padding: 8px 16px; background: transparent; border: 1px solid #555;">+ Добавить период</button>
+        <button class="mock-button" style="padding: 8px 16px; background: transparent; border: 1px solid #6366f1; color: #a5b4fc;">📄 Загрузить CSV</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Файл с датами — авто-определено</h3>
+  <div class="mockup">
+    <div class="mockup-header">Модалка после загрузки</div>
+    <div class="mockup-body" style="padding: 24px;">
+      <div style="font-size: 15px; font-weight: 600; margin-bottom: 16px;">📄 Всего отправлено.csv</div>
+
+      <div style="padding: 16px; background: #1a1a2e; border-radius: 8px; margin-bottom: 16px;">
+        <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+          <div>
+            <div style="font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Метрики</div>
+            <div style="font-size: 20px; font-weight: 700; color: #6ee7b7; margin-top: 2px;">1</div>
+            <div style="font-size: 12px; color: #aaa;">Сумма hits</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Периоды</div>
+            <div style="font-size: 20px; font-weight: 700; color: #a5b4fc; margin-top: 2px;">5</div>
+            <div style="font-size: 12px; color: #aaa;">ноя 25 — мар 26</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Строк</div>
+            <div style="font-size: 20px; font-weight: 700; color: #fcd34d; margin-top: 2px;">133</div>
+            <div style="font-size: 12px; color: #aaa;">агрегация по месяцам</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 10px 12px; background: #f59e0b15; border-radius: 6px; border-left: 3px solid #f59e0b; font-size: 12px; color: #fcd34d; margin-bottom: 16px;">
+        ⚠ Текущие данные дашборда будут заменены
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: flex-end;">
+        <button class="mock-button" style="padding: 8px 16px; background: transparent; border: 1px solid #555;">Отмена</button>
+        <button class="mock-button" style="padding: 8px 20px; background: #6366f1; border: none;">Импортировать</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Файл с категориями — авто-определено</h3>
+  <div class="mockup">
+    <div class="mockup-header">Модалка после загрузки</div>
+    <div class="mockup-body" style="padding: 24px;">
+      <div style="font-size: 15px; font-weight: 600; margin-bottom: 16px;">📄 Кол-во упоминаний копилота.csv</div>
+
+      <div style="padding: 16px; background: #1a1a2e; border-radius: 8px; margin-bottom: 16px;">
+        <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+          <div>
+            <div style="font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Метрики</div>
+            <div style="font-size: 20px; font-weight: 700; color: #6ee7b7; margin-top: 2px;">1</div>
+            <div style="font-size: 12px; color: #aaa;">Сумма hits</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Сегменты</div>
+            <div style="font-size: 20px; font-weight: 700; color: #fcd34d; margin-top: 2px;">14</div>
+            <div style="font-size: 12px; color: #aaa;">chatType_chat, chatType_user...</div>
+          </div>
+          <div>
+            <div style="font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px;">Периоды</div>
+            <div style="font-size: 20px; font-weight: 700; color: #a5b4fc; margin-top: 2px;">1</div>
+            <div style="font-size: 12px; color: #aaa;">текущий</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding: 10px 12px; background: #f59e0b15; border-radius: 6px; border-left: 3px solid #f59e0b; font-size: 12px; color: #fcd34d; margin-bottom: 16px;">
+        ⚠ Текущие данные дашборда будут заменены
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: flex-end;">
+        <button class="mock-button" style="padding: 8px 16px; background: transparent; border: 1px solid #555;">Отмена</button>
+        <button class="mock-button" style="padding: 8px 20px; background: #6366f1; border: none;">Импортировать</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Ошибка парсинга</h3>
+  <div class="mockup">
+    <div class="mockup-header">Если файл не CSV или нет числовых столбцов</div>
+    <div class="mockup-body" style="padding: 24px; text-align: center;">
+      <div style="padding: 20px; background: #ef444415; border-radius: 8px; border: 1px solid #ef444430;">
+        <div style="font-size: 20px; margin-bottom: 6px;">⚠️</div>
+        <div style="font-weight: 600; color: #fca5a5; margin-bottom: 6px;">Не удалось распознать данные</div>
+        <div style="font-size: 12px; color: #888; max-width: 320px; margin: 0 auto;">CSV должен содержать хотя бы один столбец с числами. Разделитель — запятая или точка с запятой.</div>
+      </div>
+    </div>
+  </div>
+</div>

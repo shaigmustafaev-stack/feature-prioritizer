@@ -23,12 +23,6 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  // sendBeacon шлёт POST — перенаправляем на PUT если указан _method=PUT
-  const url = new URL(request.url);
-  if (url.searchParams.get("_method") === "PUT") {
-    return PUT(request);
-  }
-
   const supabase = await supabaseServer();
   const user = await getAuthUser(supabase);
   if (!user) return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
